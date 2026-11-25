@@ -207,7 +207,11 @@ public final class AstraHud {
             drawLine(graphics, client, x, y, 130, "Rain  " + (client.level.isRaining() ? "Yes" : "No")); y += 24;
         }
         if (AstraModules.isEnabled("Moon Phase")) {
-            drawLine(graphics, client, x, y, 130, "Moon phase  " + "Vanilla sky cycle"); y += 24;
+            String[] phases = {"Full moon", "Waning gibbous", "Last quarter", "Waning crescent",
+                    "New moon", "Waxing crescent", "First quarter", "Waxing gibbous"};
+            int phase = client.level.getMoonPhase();
+            drawLine(graphics, client, x, y, 150, "Moon  " + phases[Math.floorMod(phase, phases.length)]);
+            y += 24;
         }
         if (AstraModules.isEnabled("Client Version")) {
             drawLine(graphics, client, x, y, 160, "Minecraft  26.2"); y += 24;
@@ -233,9 +237,21 @@ public final class AstraHud {
         }
         if (AstraModules.isEnabled("Status Effects") || AstraModules.isEnabled("Potion Timers")
                 || AstraModules.isEnabled("Effect Icons") || AstraModules.isEnabled("Effect Duration")) {
-            int active = 0;
-            for (var effect : client.player.getActiveEffects()) active++;
-            drawLine(graphics, client, x, y, 155, "Active effects  " + active); y += 24;
+            var effects = client.player.getActiveEffects();
+            drawLine(graphics, client, x, y, 155, "Active effects  " + effects.size());
+            y += 24;
+            if (AstraModules.isEnabled("Potion Timers") || AstraModules.isEnabled("Effect Duration")
+                    || AstraModules.isEnabled("Effect Icons") || AstraModules.isEnabled("Status Effects")) {
+                for (var effect : effects) {
+                    String name = effect.getEffect().value().getDisplayName().getString();
+                    int seconds = Math.max(0, effect.getDuration() / 20);
+                    String duration = String.format("%d:%02d", seconds / 60, seconds % 60);
+                    String level = effect.getAmplifier() > 0 ? " " + (effect.getAmplifier() + 1) : "";
+                    drawLine(graphics, client, x, y, 210, name + level + "  " + duration);
+                    y += 24;
+                    if (y > client.getWindow().getGuiScaledHeight() - 28) break;
+                }
+            }
         }
         if (AstraModules.isEnabled("Toggle Sprint")) {
             drawLine(graphics, client, x, y, 130, "Sprint  " + (client.player.isSprinting() ? "ON" : "OFF")); y += 24;
