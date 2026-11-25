@@ -326,8 +326,8 @@ public final class AstraHud {
                 }
             }
         }
-        if (AstraModules.isEnabled("Toggle Sprint")) {
-            drawLine(graphics, client, x, y, 130, "Sprint  " + (client.player.isSprinting() ? "ON" : "OFF")); y += 24;
+        if (AstraModules.isEnabled("Sprint Status")) {
+            drawLine(graphics, client, x, y, 130, "Sprint status  " + (client.player.isSprinting() ? "ON" : "OFF")); y += 24;
         }
         if (AstraModules.isEnabled("Difficulty")) {
             drawLine(graphics, client, x, y, 145, "Difficulty  " + client.level.getDifficulty());
