@@ -16,19 +16,19 @@ public final class AstraScreen extends Screen {
 
     @Override
     protected void init() {
-        int left = Math.max(18, (width - 520) / 2);
+        int left = Math.max(18, (width - 760) / 2);
         int top = Math.max(18, (height - 330) / 2);
-        String[] names = {"Coordinates", "Keystrokes", "Armor Status", "FPS Counter", "CPS Counter", "Direction", "Status Effects", "Toggle Sprint"};
+        String[] names = AstraModules.all().keySet().toArray(String[]::new);
         for (int i = 0; i < names.length; i++) {
             final String name = names[i];
-            int column = i / 4;
-            int row = i % 4;
-            int x = left + 18 + column * 247;
+            int column = i % 3;
+            int row = i / 3;
+            int x = left + 18 + column * 244;
             int y = top + 108 + row * 43;
             addRenderableWidget(Button.builder(moduleLabel(name), button -> {
                 AstraModules.toggle(name);
                 button.setMessage(moduleLabel(name));
-            }).bounds(x, y, 228, 36).build());
+            }).bounds(x, y, 226, 36).build());
         }
     }
 
@@ -39,9 +39,9 @@ public final class AstraScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
-        int left = Math.max(18, (width - 520) / 2);
+        int left = Math.max(18, (width - 760) / 2);
         int top = Math.max(18, (height - 330) / 2);
-        int right = Math.min(width - 18, left + 520);
+        int right = Math.min(width - 18, left + 760);
         int bottom = Math.min(height - 18, top + 330);
         graphics.fill(0, 0, width, height, 0x99000000);
         graphics.fill(left, top, right, bottom, PANEL);
@@ -51,7 +51,7 @@ public final class AstraScreen extends Screen {
         graphics.text(font, "CLIENT  /  MOD MENU", left + 75, top + 16, MUTED);
         graphics.text(font, "RIGHT SHIFT  ·  CLOSE", right - 142, top + 16, MUTED);
         graphics.text(font, "HUD MODULES", left + 18, top + 60, ACCENT);
-        graphics.text(font, "Classic Minecraft-style overlays. Click a module to toggle it.", left + 18, top + 78, MUTED);
+        graphics.text(font, "Traditional Minecraft-style overlays. Click to enable or disable.", left + 18, top + 78, MUTED);
         graphics.text(font, "HUD elements appear in-game when the menu is closed.", left + 18, bottom - 25, MUTED);
     }
 
