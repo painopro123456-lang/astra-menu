@@ -14,12 +14,22 @@ public final class AstraHud {
     private static final int WHITE = 0xFFF2F3F5;
     private static final int ACCENT = 0xFF9DBBEE;
     private static final DateTimeFormatter CLOCK = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final long SESSION_START_NANOS = System.nanoTime();
+    private static double jumpStartY = Double.NaN;
+    private static double jumpPeakY = Double.NaN;
 
     private AstraHud() {}
 
     public static void extract(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null || client.level == null) return;
+
+        if (client.player.onGround()) {
+            jumpStartY = client.player.getY();
+            jumpPeakY = jumpStartY;
+        } else if (!Double.isNaN(jumpStartY)) {
+            jumpPeakY = Math.max(jumpPeakY, client.player.getY());
+        }
 
         int x = 8;
         int y = 8;
@@ -315,6 +325,20 @@ public final class AstraHud {
         }
         if (AstraModules.isEnabled("Dimension ID")) {
             drawLine(graphics, client, x, y, 190, "Dimension ID  " + client.level.dimension().identifier());
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Time Played") || AstraModules.isEnabled("Session Timer")) {
+            long elapsed = (System.nanoTime() - SESSION_START_NANOS) / 1_000_000_000L;
+            long hours = elapsed / 3600;
+            long minutes = (elapsed % 3600) / 60;
+            long seconds = elapsed % 60;
+            drawLine(graphics, client, x, y, 155,
+                    "Session  " + String.format("%02d:%02d:%02d", hours, minutes, seconds));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Jump Height")) {
+            double height = Double.isNaN(jumpStartY) ? 0.0 : Math.max(0.0, jumpPeakY - jumpStartY);
+            drawLine(graphics, client, x, y, 145, String.format("Jump height  %.2f m", height));
             y += 24;
         }
         if (AstraModules.isEnabled("Server Address")) {
