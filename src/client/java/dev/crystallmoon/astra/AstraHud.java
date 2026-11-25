@@ -617,6 +617,30 @@ public final class AstraHud {
                 y += 24;
             }
         }
+        if (AstraModules.isEnabled("Arrow Trajectory")
+                && (client.player.getMainHandItem().getItem() instanceof net.minecraft.world.item.BowItem
+                || client.player.getMainHandItem().getItem() instanceof net.minecraft.world.item.CrossbowItem)) {
+            var forward = client.player.getViewVector(1.0f);
+            var right = forward.cross(new net.minecraft.world.phys.Vec3(0.0, 1.0, 0.0)).normalize();
+            var up = right.cross(forward).normalize();
+            var position = client.player.getEyePosition().add(forward.scale(0.15));
+            var velocity = forward.scale(3.0);
+            int screenWidth = client.getWindow().getGuiScaledWidth();
+            int screenHeight = client.getWindow().getGuiScaledHeight();
+            double focal = screenHeight * 0.5 / Math.tan(Math.toRadians(35.0));
+            for (int step = 0; step < 40; step++) {
+                position = position.add(velocity);
+                velocity = velocity.scale(0.99).add(0.0, -0.05, 0.0);
+                var relative = position.subtract(client.player.getEyePosition());
+                double depth = relative.dot(forward);
+                if (depth <= 0.1) continue;
+                int px = (int) Math.round(screenWidth * 0.5 + focal * relative.dot(right) / depth);
+                int py = (int) Math.round(screenHeight * 0.5 - focal * relative.dot(up) / depth);
+                if (px >= 2 && px < screenWidth - 2 && py >= 2 && py < screenHeight - 2) {
+                    graphics.fill(px - 1, py - 1, px + 2, py + 2, ACCENT);
+                }
+            }
+        }
         if (AstraModules.isEnabled("Chunk Updates")) {
             drawLine(graphics, client, x, y, 175, "Chunk updates  " + chunkUpdates);
             y += 24;
