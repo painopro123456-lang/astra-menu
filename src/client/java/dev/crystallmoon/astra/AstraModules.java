@@ -7,18 +7,30 @@ public final class AstraModules {
     private static final Map<String, Boolean> STATES = new LinkedHashMap<>();
 
     static {
-        STATES.put("Coordinates", true);
-        STATES.put("Keystrokes", true);
-        STATES.put("Armor Status", false);
-        STATES.put("FPS Counter", true);
-        STATES.put("CPS Counter", false);
-        STATES.put("Direction", true);
-        STATES.put("Status Effects", false);
-        STATES.put("Toggle Sprint", false);
-        STATES.put("Clock", true);
-        STATES.put("Health HUD", false);
-        STATES.put("Ping Display", false);
-        STATES.put("Item Counter", false);
+        add("Coordinates", true);
+        add("Keystrokes", true);
+        add("Armor Status", false);
+        add("FPS Counter", true);
+        add("CPS Counter", false);
+        add("Direction", true);
+        add("Status Effects", false);
+        add("Toggle Sprint", false);
+        add("Clock", true);
+        add("Health HUD", false);
+        add("Ping Display", false);
+        add("Item Counter", false);
+        add("Hunger HUD", false);
+        add("Saturation HUD", false);
+        add("Experience HUD", false);
+        add("Speedometer", false);
+        add("World Time", false);
+        add("Dimension", false);
+        add("Light Level", false);
+        add("Fall Distance", false);
+    }
+
+    private static void add(String name, boolean enabled) {
+        STATES.put(name, enabled);
     }
 
     private AstraModules() {}
