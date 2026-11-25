@@ -483,6 +483,61 @@ public final class AstraHud {
             drawLine(graphics, client, x, y, 220, hotbar.toString());
             y += 24;
         }
+        if (AstraModules.isEnabled("Player Counter")) {
+            drawLine(graphics, client, x, y, 155, "Players in world  " + client.level.players().size());
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Coordinates HUD")) {
+            drawLine(graphics, client, x, y, 180, String.format("Position  %.1f, %.1f, %.1f",
+                    client.player.getX(), client.player.getY(), client.player.getZ()));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Crosshair")) {
+            int cx = client.getWindow().getGuiScaledWidth() / 2;
+            int cy = client.getWindow().getGuiScaledHeight() / 2;
+            graphics.fill(cx - 7, cy, cx - 3, cy + 1, WHITE);
+            graphics.fill(cx + 3, cy, cx + 7, cy + 1, WHITE);
+            graphics.fill(cx, cy - 7, cx + 1, cy - 3, WHITE);
+            graphics.fill(cx, cy + 3, cx + 1, cy + 7, WHITE);
+        }
+        if (AstraModules.isEnabled("Block Resistance") || AstraModules.isEnabled("Mining Speed")
+                || AstraModules.isEnabled("Harvest Level") || AstraModules.isEnabled("Breaking Progress")
+                || AstraModules.isEnabled("Light Overlay")) {
+            if (client.hitResult instanceof net.minecraft.world.phys.BlockHitResult blockHit) {
+                var pos = blockHit.getBlockPos();
+                var state = client.level.getBlockState(pos);
+                if (AstraModules.isEnabled("Block Resistance")) {
+                    drawLine(graphics, client, x, y, 190, String.format("Blast resistance  %.1f",
+                            state.getBlock().getExplosionResistance()));
+                    y += 24;
+                }
+                if (AstraModules.isEnabled("Mining Speed")) {
+                    drawLine(graphics, client, x, y, 190, String.format("Mining speed  %.2f",
+                            client.player.getDestroySpeed(state)));
+                    y += 24;
+                }
+                if (AstraModules.isEnabled("Breaking Progress")) {
+                    drawLine(graphics, client, x, y, 190, "Breaking progress  " +
+                            (client.gameMode == null ? "N/A" : "Hold attack to mine"));
+                    y += 24;
+                }
+                if (AstraModules.isEnabled("Harvest Level")) {
+                    drawLine(graphics, client, x, y, 190, "Harvest tool  " +
+                            (client.player.getMainHandItem().isCorrectToolForDrops(state) ? "Suitable" : "Not suitable"));
+                    y += 24;
+                }
+                if (AstraModules.isEnabled("Light Overlay")) {
+                    int light = client.level.getMaxLocalRawBrightness(pos);
+                    drawLine(graphics, client, x, y, 190, "Block light  " + light);
+                    y += 24;
+                }
+            } else if (AstraModules.isEnabled("Breaking Progress") || AstraModules.isEnabled("Mining Speed")
+                    || AstraModules.isEnabled("Block Resistance") || AstraModules.isEnabled("Harvest Level")
+                    || AstraModules.isEnabled("Light Overlay")) {
+                drawLine(graphics, client, x, y, 190, "Block details  Look at a block");
+                y += 24;
+            }
+        }
         if (AstraModules.isEnabled("Spawnable Light")) {
             int light = client.level.getMaxLocalRawBrightness(client.player.blockPosition());
             drawLine(graphics, client, x, y, 165, "Spawn light  " + light + (light < 8 ? "  (hostile spawn risk)" : ""));
