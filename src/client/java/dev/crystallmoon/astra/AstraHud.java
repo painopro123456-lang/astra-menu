@@ -2,6 +2,10 @@ package dev.crystallmoon.astra;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.DeltaTracker;
@@ -17,6 +21,13 @@ public final class AstraHud {
     private static final long SESSION_START_NANOS = System.nanoTime();
     private static double jumpStartY = Double.NaN;
     private static double jumpPeakY = Double.NaN;
+    private static boolean leftWasDown;
+    private static boolean rightWasDown;
+    private static final Deque<Long> CLICK_TIMES = new ArrayDeque<>();
+    private static final int[] FPS_SAMPLES = new int[32];
+    private static final int[] PING_SAMPLES = new int[32];
+    private static int graphIndex;
+    private static long lastGraphSample;
 
     private AstraHud() {}
 
@@ -29,6 +40,23 @@ public final class AstraHud {
             jumpPeakY = jumpStartY;
         } else if (!Double.isNaN(jumpStartY)) {
             jumpPeakY = Math.max(jumpPeakY, client.player.getY());
+        }
+
+        long now = System.nanoTime();
+        long window = client.getWindow().getWindow();
+        boolean leftDown = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
+        boolean rightDown = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS;
+        if (leftDown && !leftWasDown || rightDown && !rightWasDown) CLICK_TIMES.addLast(now);
+        leftWasDown = leftDown;
+        rightWasDown = rightDown;
+        while (!CLICK_TIMES.isEmpty() && now - CLICK_TIMES.peekFirst() > 1_000_000_000L) CLICK_TIMES.removeFirst();
+        if (now - lastGraphSample >= 250_000_000L) {
+            FPS_SAMPLES[graphIndex] = client.getFps();
+            var connection = client.getConnection();
+            var playerInfo = connection == null ? null : connection.getPlayerInfo(client.player.getUUID());
+            PING_SAMPLES[graphIndex] = playerInfo == null ? 0 : playerInfo.getLatency();
+            graphIndex = (graphIndex + 1) % FPS_SAMPLES.length;
+            lastGraphSample = now;
         }
 
         int x = 8;
@@ -341,6 +369,18 @@ public final class AstraHud {
             drawLine(graphics, client, x, y, 145, String.format("Jump height  %.2f m", height));
             y += 24;
         }
+        if (AstraModules.isEnabled("CPS Counter")) {
+            drawLine(graphics, client, x, y, 120, "CPS  " + CLICK_TIMES.size());
+            y += 24;
+        }
+        if (AstraModules.isEnabled("FPS Graph")) {
+            drawGraph(graphics, x, y, "FPS", FPS_SAMPLES, 240);
+            y += 52;
+        }
+        if (AstraModules.isEnabled("Ping Graph")) {
+            drawGraph(graphics, x, y, "PING", PING_SAMPLES, 240);
+            y += 52;
+        }
         if (AstraModules.isEnabled("Server Address")) {
             var server = client.getCurrentServer();
             drawLine(graphics, client, x, y, 210, "Server  " + (server == null ? "Singleplayer" : server.ip));
@@ -416,6 +456,20 @@ public final class AstraHud {
             int light = client.level.getMaxLocalRawBrightness(client.player.blockPosition());
             drawLine(graphics, client, x, y, 165, "Spawn light  " + light + (light < 8 ? "  (hostile spawn risk)" : ""));
             y += 24;
+        }
+    }
+
+    private static void drawGraph(GuiGraphicsExtractor graphics, int x, int y, String label, int[] samples, int width) {
+        graphics.fill(x, y, x + width, y + 46, BACKGROUND);
+        graphics.text(Minecraft.getInstance().font, label, x + 5, y + 4, WHITE);
+        int max = 1;
+        for (int value : samples) max = Math.max(max, value);
+        int barWidth = Math.max(2, (width - 10) / samples.length);
+        for (int i = 0; i < samples.length; i++) {
+            int sample = samples[(graphIndex + i) % samples.length];
+            int height = Math.max(1, sample * 30 / max);
+            int bx = x + 5 + i * barWidth;
+            graphics.fill(bx, y + 40 - height, bx + Math.max(1, barWidth - 1), y + 40, ACCENT);
         }
     }
 
