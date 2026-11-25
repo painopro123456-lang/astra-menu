@@ -5,10 +5,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
 /**
- * Defers the expensive eager baking of DFU migration rules.
+ * Defers the eager baking of DFU migration rules.
  *
- * DFU itself remains enabled. If an old world actually needs conversion,
- * Minecraft can still build and use the required rules at that point.
+ * DFU itself remains enabled. If an old world needs conversion, Minecraft
+ * can still build and use the required rules when they are needed.
  */
 @Mixin(SharedConstants.class)
 public abstract class SharedConstantsMixin {
@@ -17,7 +17,7 @@ public abstract class SharedConstantsMixin {
      * @reason Avoid eagerly baking every historical migration rule at startup.
      */
     @Overwrite
-    public static void enableDataFixerOptimizations() {
-        // Intentionally deferred; do not eagerly bake all DFU rules on launch.
+    public static void enableDataFixerOptimization() {
+        // Intentionally defer the optimization work until it is needed.
     }
 }
