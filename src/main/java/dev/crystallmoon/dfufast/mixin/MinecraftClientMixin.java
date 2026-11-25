@@ -8,10 +8,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Records when Minecraft first installs its title screen.
- * A string target avoids requiring client classes during compilation.
+ * Records when Minecraft 26.2 installs its title screen.
+ * In 26.2 screen management moved from Minecraft to Gui.
  */
-@Mixin(targets = "net.minecraft.client.Minecraft")
+@Mixin(targets = "net.minecraft.client.gui.Gui")
 public abstract class MinecraftClientMixin {
     @Inject(method = "setScreen", at = @At("TAIL"), require = 1)
     private void dfuFast$recordTitleScreen(@Coerce Object screen, CallbackInfo ci) {
