@@ -3,8 +3,7 @@
   "package": "dev.crystallmoon.dfufast.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
-    "SharedConstantsMixin",
-    "MinecraftClientMixin"
+    "SharedConstantsMixin"
   ],
   "injectors": {
     "defaultRequire": 1
