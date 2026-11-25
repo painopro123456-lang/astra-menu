@@ -3,8 +3,10 @@
   "id": "dfu_fast",
   "version": "${version}",
   "name": "DFU Fast",
-  "description": "A lightweight startup diagnostic checkpoint for identifying Minecraft launch bottlenecks.",
-  "authors": ["Crystallmoon"],
+  "description": "Defers eager DataFixerUpper migration-rule baking to reduce startup work while keeping world conversion available when needed.",
+  "authors": [
+    "Crystallmoon"
+  ],
   "environment": "client",
   "entrypoints": {
     "client": [
@@ -15,5 +17,8 @@
     "fabricloader": ">=0.19.3",
     "minecraft": "26.2",
     "java": ">=25"
-  }
+  },
+  "mixins": [
+    "dfu_fast.mixins.json"
+  ]
 }
