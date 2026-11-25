@@ -76,14 +76,14 @@ public final class AstraHud {
             y += 24;
         }
         if (AstraModules.isEnabled("World Time")) {
-            long ticks = Math.floorMod(client.level.getDayTime(), 24000L);
+            long ticks = Math.floorMod(client.level.getLevelData().getDayTime(), 24000L);
             long hours = (ticks / 1000 + 6) % 24;
             long minutes = (ticks % 1000) * 60 / 1000;
             drawLine(graphics, client, x, y, 145, String.format("World  %02d:%02d", hours, minutes));
             y += 24;
         }
         if (AstraModules.isEnabled("Dimension")) {
-            drawLine(graphics, client, x, y, 180, "Dimension  " + client.level.dimension().location());
+            drawLine(graphics, client, x, y, 180, "Dimension  " + client.level.dimension().toString());
             y += 24;
         }
         if (AstraModules.isEnabled("Light Level")) {
