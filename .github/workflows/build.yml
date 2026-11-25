@@ -1,14 +1,12 @@
-name: Build
+name: Build JAR
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -28,12 +26,15 @@ jobs:
         with:
           gradle-version: '9.6.1'
 
-      - name: Build mod
-        run: gradle --no-daemon build
+      - name: Build mod JAR
+        run: gradle --no-daemon clean remapJar
 
-      - name: Upload mod jar
-        uses: actions/upload-artifact@v4
+      - name: Publish JAR release asset
+        uses: softprops/action-gh-release@v2
         with:
-          name: dfu-fast-minecraft-26.2
-          path: build/libs/*.jar
-          if-no-files-found: error
+          tag_name: build-${{ github.run_number }}
+          name: DFU Fast build ${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          files: build/libs/dfu-fast-*.jar
+          fail_on_unmatched_files: true
+          generate_release_notes: true
