@@ -1,6 +1,6 @@
 # DFU Fast
 
-A small client-side Fabric mod for Minecraft **26.2** that skips the eager DataFixerUpper (DFU) optimization pass during startup.
+A small client-side Fabric mod for Minecraft **26.2** that skips the eager DataFixerUpper (DFU) optimization pass during startup and records when the Minecraft title screen first appears.
 
 ## What it changes
 
@@ -8,11 +8,19 @@ DFU Fast injects at the start of Minecraft's `SharedConstants.enableDataFixerOpt
 
 DFU itself is not removed, and the mod does not replace Minecraft's data conversion rules. This changes when the optimization pass runs; it does not promise that every possible world conversion will be prepared later in exactly the same way on every game version. Back up worlds before testing.
 
+## Startup measurement
+
+The mod logs two checkpoints in `latest.log`:
+- When Fabric client initialization begins.
+- When the title screen is first displayed.
+
+The second value is the elapsed JVM uptime at the main menu. Compare several launches with and without DFU Fast, keeping the same launcher, mod list, and settings. This measures the whole launch path, not just DFU, so use repeated runs and compare medians.
+
 ## Performance expectations
 
 This targets only the DFU optimization call during startup. It does not speed up Fabric mod discovery, resource loading, Java startup, or other launch work.
 
-Mojang improved DFU initialization in modern Minecraft versions, so the benefit may be small or even unnoticeable on 26.2. No specific time saving is guaranteed. Compare several launches with and without the mod, using the same mod list and launcher.
+Mojang improved DFU initialization in modern Minecraft versions, so the benefit may be small or even unnoticeable on 26.2. No specific time saving is guaranteed. If startup is not faster, remove the mod; do not expect it to improve chunk loading, FPS, or network ping.
 
 ## Compatibility
 
@@ -27,4 +35,3 @@ Mojang improved DFU initialization in modern Minecraft versions, so the benefit 
 - Back up important worlds before testing.
 - Test old worlds only on copies.
 - If Minecraft crashes on startup, remove DFU Fast and share the crash log.
-- If startup is not faster, remove the mod; do not expect it to improve chunk loading, FPS, or network ping.
