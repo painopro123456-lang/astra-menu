@@ -12,6 +12,8 @@ public final class AstraMenuClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        AstraModules.load();
+
         openMenu = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.astra_menu.open",
                 GLFW.GLFW_KEY_RIGHT_SHIFT,
