@@ -24,7 +24,7 @@ public final class AstraModules {
         add("CPS Counter", false);
         add("Direction", true);
         add("Status Effects", false);
-        add("Toggle Sprint", false);
+        add("Sprint Status", false);
         add("Clock", true);
         add("Health HUD", false);
         add("Ping Display", false);
