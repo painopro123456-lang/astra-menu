@@ -31,8 +31,11 @@ public final class AstraHud {
     private static float previousHealth = -1.0f;
     private static float lastDamageAmount;
     private static long lastDamageNanos;
+    private static int chunkUpdates;
 
     private AstraHud() {}
+
+    public static void noteChunkUpdate() { chunkUpdates++; }
 
     public static void extract(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
         Minecraft client = Minecraft.getInstance();
@@ -537,6 +540,10 @@ public final class AstraHud {
                 drawLine(graphics, client, x, y, 190, "Block details  Look at a block");
                 y += 24;
             }
+        }
+        if (AstraModules.isEnabled("Chunk Updates")) {
+            drawLine(graphics, client, x, y, 175, "Chunk updates  " + chunkUpdates);
+            y += 24;
         }
         if (AstraModules.isEnabled("Spawnable Light")) {
             int light = client.level.getMaxLocalRawBrightness(client.player.blockPosition());
