@@ -27,7 +27,12 @@ jobs:
           gradle-version: '9.6.1'
 
       - name: Build mod JAR
-        run: gradle --no-daemon clean remapJar
+        run: gradle --no-daemon clean jar
+
+      - name: Verify JAR contents
+        run: |
+          test -f build/libs/dfu-fast-${{ github.sha }}.jar || ls -la build/libs
+          jar tf build/libs/dfu-fast-*.jar | grep -E 'fabric.mod.json|DfuFast.class'
 
       - name: Publish JAR release asset
         uses: softprops/action-gh-release@v2
