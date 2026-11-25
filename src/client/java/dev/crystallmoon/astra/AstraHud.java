@@ -244,6 +244,68 @@ public final class AstraHud {
             drawLine(graphics, client, x, y, 145, "Difficulty  " + client.level.getDifficulty());
             y += 24;
         }
+        if (AstraModules.isEnabled("Movement Speed") || AstraModules.isEnabled("Horizontal Speed")) {
+            double speed = client.player.getDeltaMovement().horizontalDistance() * 20.0;
+            String label = AstraModules.isEnabled("Movement Speed") ? "Movement speed  " : "Horizontal speed  ";
+            drawLine(graphics, client, x, y, 165, String.format(label + "%.2f m/s", speed));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Vertical Speed")) {
+            drawLine(graphics, client, x, y, 140, String.format("Vertical speed  %.2f m/s",
+                    client.player.getDeltaMovement().y * 20.0));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Velocity")) {
+            var velocity = client.player.getDeltaMovement();
+            drawLine(graphics, client, x, y, 190, String.format("Velocity  %.2f / %.2f / %.2f",
+                    velocity.x * 20.0, velocity.y * 20.0, velocity.z * 20.0));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Elytra Speed") && client.player.isFallFlying()) {
+            drawLine(graphics, client, x, y, 145, String.format("Elytra  %.2f m/s",
+                    client.player.getDeltaMovement().horizontalDistance() * 20.0));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Vehicle HUD") && client.player.getVehicle() != null) {
+            var vehicle = client.player.getVehicle();
+            drawLine(graphics, client, x, y, 190, "Vehicle  " + vehicle.getType().toString());
+            y += 24;
+            if (AstraModules.isEnabled("Horse Speed") || AstraModules.isEnabled("Boat Speed")) {
+                drawLine(graphics, client, x, y, 155, String.format("Vehicle speed  %.2f m/s",
+                        vehicle.getDeltaMovement().horizontalDistance() * 20.0));
+                y += 24;
+            }
+            if (AstraModules.isEnabled("Mount Health") && vehicle instanceof net.minecraft.world.entity.LivingEntity living) {
+                drawLine(graphics, client, x, y, 150, String.format("Mount health  %.1f / %.0f",
+                        living.getHealth(), living.getMaxHealth()));
+                y += 24;
+            }
+        }
+        if (AstraModules.isEnabled("Health Bar")) {
+            int max = Math.max(1, Math.round(client.player.getMaxHealth()));
+            int current = Math.max(0, Math.round(client.player.getHealth()));
+            String bar = "♥ ".repeat(Math.min(current, 20)) + "♡ ".repeat(Math.max(0, Math.min(max, 20) - current));
+            drawLine(graphics, client, x, y, 190, "Health  " + bar);
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Game Mode") && client.gameMode != null) {
+            drawLine(graphics, client, x, y, 150, "Game mode  " + client.gameMode.getPlayerMode().getName());
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Network Status")) {
+            drawLine(graphics, client, x, y, 155, "Network  " +
+                    (client.getConnection() == null ? "Offline" : "Connected"));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Dimension ID")) {
+            drawLine(graphics, client, x, y, 190, "Dimension ID  " + client.level.dimension().identifier());
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Spawnable Light")) {
+            int light = client.level.getMaxLocalRawBrightness(client.player.blockPosition());
+            drawLine(graphics, client, x, y, 165, "Spawn light  " + light + (light < 8 ? "  (hostile spawn risk)" : ""));
+            y += 24;
+        }
     }
 
     private static void drawLine(GuiGraphicsExtractor graphics, Minecraft client, int x, int y, int width, String text) {
