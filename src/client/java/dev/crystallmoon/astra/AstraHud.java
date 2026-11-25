@@ -212,6 +212,31 @@ public final class AstraHud {
         if (AstraModules.isEnabled("Client Version")) {
             drawLine(graphics, client, x, y, 160, "Minecraft  26.2"); y += 24;
         }
+        if (AstraModules.isEnabled("Inventory Status") || AstraModules.isEnabled("Empty Slots")
+                || AstraModules.isEnabled("Totem Counter") || AstraModules.isEnabled("Arrow Counter")
+                || AstraModules.isEnabled("Food Counter") || AstraModules.isEnabled("Potion Counter")) {
+            int empty = 0, totems = 0, arrows = 0, food = 0, potions = 0;
+            for (int i = 0; i < client.player.getInventory().getContainerSize(); i++) {
+                ItemStack stack = client.player.getInventory().getItem(i);
+                if (stack.isEmpty()) { empty++; continue; }
+                String item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+                if (item.equals("totem_of_undying")) totems += stack.getCount();
+                if (item.contains("arrow")) arrows += stack.getCount();
+                if (item.contains("potion")) potions += stack.getCount();
+                if (stack.getFoodProperties(client.player) != null) food += stack.getCount();
+            }
+            if (AstraModules.isEnabled("Inventory Status") || AstraModules.isEnabled("Empty Slots")) { drawLine(graphics, client, x, y, 155, "Empty slots  " + empty); y += 24; }
+            if (AstraModules.isEnabled("Totem Counter")) { drawLine(graphics, client, x, y, 125, "Totems  " + totems); y += 24; }
+            if (AstraModules.isEnabled("Arrow Counter")) { drawLine(graphics, client, x, y, 125, "Arrows  " + arrows); y += 24; }
+            if (AstraModules.isEnabled("Food Counter")) { drawLine(graphics, client, x, y, 125, "Food  " + food); y += 24; }
+            if (AstraModules.isEnabled("Potion Counter")) { drawLine(graphics, client, x, y, 125, "Potions  " + potions); y += 24; }
+        }
+        if (AstraModules.isEnabled("Status Effects") || AstraModules.isEnabled("Potion Timers")
+                || AstraModules.isEnabled("Effect Icons") || AstraModules.isEnabled("Effect Duration")) {
+            int active = 0;
+            for (var effect : client.player.getActiveEffects()) active++;
+            drawLine(graphics, client, x, y, 155, "Active effects  " + active); y += 24;
+        }
         if (AstraModules.isEnabled("Toggle Sprint")) {
             drawLine(graphics, client, x, y, 130, "Sprint  " + (client.player.isSprinting() ? "ON" : "OFF")); y += 24;
         }
