@@ -3,7 +3,7 @@
   "id": "dfu_fast",
   "version": "${version}",
   "name": "DFU Fast",
-  "description": "Safely preloads DataFixerUpper classes in the background to reduce main-thread class-loading work during startup.",
+  "description": "A lightweight startup diagnostic checkpoint for identifying Minecraft launch bottlenecks.",
   "authors": ["Crystallmoon"],
   "environment": "client",
   "entrypoints": {
