@@ -333,13 +333,20 @@ public final class AstraHud {
                     client.player.getDeltaMovement().horizontalDistance() * 20.0));
             y += 24;
         }
-        if (AstraModules.isEnabled("Vehicle HUD") && client.player.getVehicle() != null) {
+        if (client.player.getVehicle() != null) {
             var vehicle = client.player.getVehicle();
-            drawLine(graphics, client, x, y, 190, "Vehicle  " + vehicle.getType().toString());
-            y += 24;
-            if (AstraModules.isEnabled("Horse Speed") || AstraModules.isEnabled("Boat Speed")) {
-                drawLine(graphics, client, x, y, 155, String.format("Vehicle speed  %.2f m/s",
-                        vehicle.getDeltaMovement().horizontalDistance() * 20.0));
+            String vehicleType = vehicle.getType().toString().toLowerCase(java.util.Locale.ROOT);
+            double vehicleSpeed = vehicle.getDeltaMovement().horizontalDistance() * 20.0;
+            if (AstraModules.isEnabled("Vehicle HUD")) {
+                drawLine(graphics, client, x, y, 190, "Vehicle  " + vehicle.getType().toString());
+                y += 24;
+            }
+            if (AstraModules.isEnabled("Horse Speed") && vehicleType.contains("horse")) {
+                drawLine(graphics, client, x, y, 155, String.format("Horse speed  %.2f m/s", vehicleSpeed));
+                y += 24;
+            }
+            if (AstraModules.isEnabled("Boat Speed") && vehicleType.contains("boat")) {
+                drawLine(graphics, client, x, y, 155, String.format("Boat speed  %.2f m/s", vehicleSpeed));
                 y += 24;
             }
             if (AstraModules.isEnabled("Mount Health") && vehicle instanceof net.minecraft.world.entity.LivingEntity living) {
