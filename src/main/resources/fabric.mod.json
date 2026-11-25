@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "astra_menu",
+  "version": "${version}",
+  "name": "Astra Menu",
+  "description": "A polished client-side Minecraft utility menu with classic, readable HUDs.",
+  "authors": ["Crystallmoon"],
+  "environment": "client",
+  "entrypoints": {
+    "client": ["dev.crystallmoon.astra.AstraMenuClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.2",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
