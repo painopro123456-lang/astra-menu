@@ -6,6 +6,7 @@
   "description": "A polished client-side Minecraft utility menu with classic, readable HUDs.",
   "authors": ["Crystallmoon"],
   "environment": "client",
+  "mixins": ["astra_menu.mixins.json"],
   "entrypoints": {
     "client": ["dev.crystallmoon.astra.AstraMenuClient"]
   },
