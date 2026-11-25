@@ -277,7 +277,16 @@ public final class AstraHud {
                 if (item.equals("totem_of_undying")) totems += stack.getCount();
                 if (item.contains("arrow")) arrows += stack.getCount();
                 if (item.contains("potion")) potions += stack.getCount();
-                if (stack.getItem().getFoodProperties(stack, client.player) != null) food += stack.getCount();
+                if (item.contains("bread") || item.contains("apple") || item.contains("carrot")
+                        || item.contains("potato") || item.contains("beef") || item.contains("porkchop")
+                        || item.contains("chicken") || item.contains("mutton") || item.contains("rabbit")
+                        || item.contains("cod") || item.contains("salmon") || item.contains("melon")
+                        || item.contains("cookie") || item.contains("cake") || item.contains("pie")
+                        || item.contains("stew") || item.contains("soup") || item.contains("berries")
+                        || item.contains("chorus_fruit") || item.contains("dried_kelp")
+                        || item.contains("honey_bottle") || item.contains("tropical_fish")
+                        || item.contains("pufferfish") || item.contains("rotten_flesh")
+                        || item.contains("spider_eye")) food += stack.getCount();
                 
             }
             if (AstraModules.isEnabled("Inventory Status") || AstraModules.isEnabled("Empty Slots")) { drawLine(graphics, client, x, y, 155, "Empty slots  " + empty); y += 24; }
@@ -470,9 +479,10 @@ public final class AstraHud {
                 drawLine(graphics, client, x, y, 150, "Loaded entities  " + entities); y += 24;
             }
             if (AstraModules.isEnabled("Nearby Entities")) {
-                long nearby = client.level.entitiesForRendering().stream()
-                        .filter(entity -> entity != client.player)
-                        .filter(entity -> entity.distanceToSqr(client.player) <= 32.0 * 32.0).count();
+                long nearby = 0;
+                for (var entity : client.level.entitiesForRendering()) {
+                    if (entity != client.player && entity.distanceToSqr(client.player) <= 32.0 * 32.0) nearby++;
+                }
                 drawLine(graphics, client, x, y, 150, "Nearby entities  " + nearby); y += 24;
             }
             if (AstraModules.isEnabled("Mob Counter")) {
