@@ -2,6 +2,7 @@
   "required": true,
   "package": "dev.crystallmoon.astra.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["AstraBossOverlayAccessor"],
+  "client": ["AstraBossOverlayAccessor",
+    "AstraGameModeAccessor"],
   "injectors": {"defaultRequire": 1}
 }
