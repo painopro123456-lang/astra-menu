@@ -31,8 +31,11 @@ jobs:
 
       - name: Verify JAR contents
         run: |
-          test -f build/libs/dfu-fast-${{ github.sha }}.jar || ls -la build/libs
-          jar tf build/libs/dfu-fast-*.jar | grep -E 'fabric.mod.json|DfuFast.class'
+          JAR="$(find build/libs -maxdepth 1 -type f -name 'dfu-fast-*.jar' -print -quit)"
+          test -n "$JAR"
+          jar tf "$JAR" | grep -q 'fabric.mod.json'
+          jar tf "$JAR" | grep -q 'dev/crystallmoon/dfufast/DfuFast.class'
+          echo "Verified $JAR"
 
       - name: Publish JAR release asset
         uses: softprops/action-gh-release@v2
