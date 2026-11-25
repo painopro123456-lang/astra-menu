@@ -32,6 +32,19 @@ public final class AstraHud {
     private static float lastDamageAmount;
     private static long lastDamageNanos;
     private static int chunkUpdates;
+    private static long lastServerGameTime = -1L;
+    private static long lastServerTimeNanos;
+    private static double estimatedServerTps = -1.0;
+
+    public static void noteServerTime(long gameTime) {
+        long now = System.nanoTime();
+        if (lastServerGameTime >= 0L && gameTime > lastServerGameTime && lastServerTimeNanos > 0L) {
+            double elapsed = (now - lastServerTimeNanos) / 1_000_000_000.0;
+            if (elapsed > 0.0) estimatedServerTps = Math.min(20.0, (gameTime - lastServerGameTime) / elapsed);
+        }
+        lastServerGameTime = gameTime;
+        lastServerTimeNanos = now;
+    }
 
     private AstraHud() {}
 
@@ -446,6 +459,17 @@ public final class AstraHud {
                     if (y > client.getWindow().getGuiScaledHeight() - 28) break;
                 }
             }
+        }
+        if (AstraModules.isEnabled("Server TPS")) {
+            drawLine(graphics, client, x, y, 170, estimatedServerTps < 0.0
+                    ? "Server TPS  Measuring..." : String.format("Server TPS  %.1f", estimatedServerTps));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Packet Rate")) {
+            float packets = client.getConnection() == null ? 0.0f
+                    : client.getConnection().getConnection().getAverageReceivedPackets();
+            drawLine(graphics, client, x, y, 170, String.format("Packets/s  %.1f", packets));
+            y += 24;
         }
         if (AstraModules.isEnabled("Server Address")) {
             var server = client.getCurrentServer();
