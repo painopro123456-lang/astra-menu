@@ -209,7 +209,7 @@ public final class AstraHud {
         if (AstraModules.isEnabled("Moon Phase")) {
             String[] phases = {"Full moon", "Waning gibbous", "Last quarter", "Waning crescent",
                     "New moon", "Waxing crescent", "First quarter", "Waxing gibbous"};
-            int phase = client.level.getMoonPhase();
+            int phase = (int) Math.floorMod(client.level.getLevelData().getGameTime() / 24000L, 8L);
             drawLine(graphics, client, x, y, 150, "Moon  " + phases[Math.floorMod(phase, phases.length)]);
             y += 24;
         }
