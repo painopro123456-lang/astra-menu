@@ -453,7 +453,7 @@ public final class AstraHud {
             y += 24;
         }
         if (AstraModules.isEnabled("Server Brand")) {
-            String brand = client.player.getServerBrand();
+            String brand = client.getConnection() == null ? null : client.getConnection().serverBrand();
             drawLine(graphics, client, x, y, 210, "Server brand  " + (brand == null || brand.isBlank() ? "Unknown" : brand));
             y += 24;
         }
@@ -567,11 +567,13 @@ public final class AstraHud {
                 }
                 if (AstraModules.isEnabled("Breaking Progress")) {
                     boolean attacking = client.options.keyAttack.isDown();
-                    float progress = client.gameMode == null || !attacking ? 0.0f
-                            : client.gameMode.getDestroyProgress(state, pos);
-                    drawLine(graphics, client, x, y, 190, attacking
+                    var breaking = (dev.crystallmoon.astra.mixin.AstraGameModeAccessor) client.gameMode;
+                    float progress = breaking.astra$isDestroying()
+                            && breaking.astra$getDestroyBlockPos().equals(pos)
+                            ? breaking.astra$getDestroyProgress() : 0.0f;
+                    drawLine(graphics, client, x, y, 190, attacking && breaking.astra$isDestroying()
                             ? String.format("Breaking progress  %.0f%%", Math.min(100.0f, progress * 100.0f))
-                            : "Breaking progress  Hold attack");
+                            : "Breaking progress  Start mining");
                     y += 24;
                 }
                 if (AstraModules.isEnabled("Harvest Level")) {
