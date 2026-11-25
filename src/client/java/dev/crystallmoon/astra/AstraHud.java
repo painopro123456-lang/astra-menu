@@ -423,6 +423,21 @@ public final class AstraHud {
                     : "Combat  " + seconds + "s since hit");
             y += 24;
         }
+        if (AstraModules.isEnabled("Boss Bar")) {
+            var bossEvents = ((dev.crystallmoon.astra.mixin.AstraBossOverlayAccessor)
+                    client.gui.hud.getBossOverlay()).astra$getEvents();
+            if (bossEvents.isEmpty()) {
+                drawLine(graphics, client, x, y, 180, "Boss bars  None");
+                y += 24;
+            } else {
+                for (var boss : bossEvents.values()) {
+                    drawLine(graphics, client, x, y, 220, String.format("%s  %.0f%%",
+                            boss.getName().getString(), boss.getProgress() * 100.0f));
+                    y += 24;
+                    if (y > client.getWindow().getGuiScaledHeight() - 28) break;
+                }
+            }
+        }
         if (AstraModules.isEnabled("Server Address")) {
             var server = client.getCurrentServer();
             drawLine(graphics, client, x, y, 210, "Server  " + (server == null ? "Singleplayer" : server.ip));
