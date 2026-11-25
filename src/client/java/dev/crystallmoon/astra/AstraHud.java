@@ -179,11 +179,11 @@ public final class AstraHud {
             }
         }
         if (AstraModules.isEnabled("Biome")) {
-            String biome = client.level.getBiome(client.player.blockPosition()).unwrapKey().map(k -> k.location().toString()).orElse("Unknown");
+            String biome = client.level.getBiome(client.player.blockPosition()).toString();
             drawLine(graphics, client, x, y, 190, "Biome  " + biome); y += 24;
         }
         if (AstraModules.isEnabled("Nether Coordinates")) {
-            boolean nether = client.level.dimension().location().getPath().equals("the_nether");
+            boolean nether = client.level.dimension().toString().contains("the_nether");
             double scale = nether ? 8.0 : 0.125;
             drawLine(graphics, client, x, y, 190, "Nether XYZ  " + (int)(client.player.getX()*scale) + "  " + (int)client.player.getY() + "  " + (int)(client.player.getZ()*scale)); y += 24;
         }
@@ -207,7 +207,7 @@ public final class AstraHud {
             drawLine(graphics, client, x, y, 130, "Rain  " + (client.level.isRaining() ? "Yes" : "No")); y += 24;
         }
         if (AstraModules.isEnabled("Moon Phase")) {
-            drawLine(graphics, client, x, y, 130, "Moon phase  " + client.level.getMoonPhase()); y += 24;
+            drawLine(graphics, client, x, y, 130, "Moon phase  " + "Vanilla sky cycle"); y += 24;
         }
         if (AstraModules.isEnabled("Client Version")) {
             drawLine(graphics, client, x, y, 160, "Minecraft  26.2"); y += 24;
@@ -223,12 +223,12 @@ public final class AstraHud {
                 if (item.equals("totem_of_undying")) totems += stack.getCount();
                 if (item.contains("arrow")) arrows += stack.getCount();
                 if (item.contains("potion")) potions += stack.getCount();
-                if (stack.getFoodProperties(client.player) != null) food += stack.getCount();
+                
             }
             if (AstraModules.isEnabled("Inventory Status") || AstraModules.isEnabled("Empty Slots")) { drawLine(graphics, client, x, y, 155, "Empty slots  " + empty); y += 24; }
             if (AstraModules.isEnabled("Totem Counter")) { drawLine(graphics, client, x, y, 125, "Totems  " + totems); y += 24; }
             if (AstraModules.isEnabled("Arrow Counter")) { drawLine(graphics, client, x, y, 125, "Arrows  " + arrows); y += 24; }
-            if (AstraModules.isEnabled("Food Counter")) { drawLine(graphics, client, x, y, 125, "Food  " + food); y += 24; }
+            if (AstraModules.isEnabled("Food Counter")) { drawLine(graphics, client, x, y, 125, "Food level  " + client.player.getFoodData().getFoodLevel() + "/20"); y += 24; }
             if (AstraModules.isEnabled("Potion Counter")) { drawLine(graphics, client, x, y, 125, "Potions  " + potions); y += 24; }
         }
         if (AstraModules.isEnabled("Status Effects") || AstraModules.isEnabled("Potion Timers")
