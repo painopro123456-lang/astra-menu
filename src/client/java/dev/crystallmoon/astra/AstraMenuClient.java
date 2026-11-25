@@ -28,6 +28,11 @@ public final class AstraMenuClient implements ClientModInitializer {
                 KeyMapping.Category.MISC
         ));
 
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents.CHUNK_LOAD.register(
+                (world, chunk) -> AstraHud.noteChunkUpdate());
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents.CHUNK_UNLOAD.register(
+                (world, chunk) -> AstraHud.noteChunkUpdate());
+
         HudElementRegistry.addLast(
                 Identifier.fromNamespaceAndPath("astra_menu", "classic_hud"),
                 AstraHud::extract
