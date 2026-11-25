@@ -535,15 +535,25 @@ public final class AstraHud {
                 y += 24;
             }
         }
-        if (AstraModules.isEnabled("Durability") || AstraModules.isEnabled("Tool Durability")
-                || AstraModules.isEnabled("Armor Durability")) {
+        if (AstraModules.isEnabled("Durability") || AstraModules.isEnabled("Tool Durability")) {
             ItemStack tool = client.player.getMainHandItem();
             if (!tool.isEmpty() && tool.isDamageableItem()) {
                 drawLine(graphics, client, x, y, 180, "Tool durability  "
                         + Math.max(0, tool.getMaxDamage() - tool.getDamageValue()) + " / " + tool.getMaxDamage());
                 y += 24;
-            } else if (AstraModules.isEnabled("Tool Durability") || AstraModules.isEnabled("Durability")) {
+            } else {
                 drawLine(graphics, client, x, y, 150, "Tool durability  N/A");
+                y += 24;
+            }
+        }
+        if (AstraModules.isEnabled("Armor Durability")) {
+            for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST,
+                    EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+                ItemStack armor = client.player.getItemBySlot(slot);
+                String label = slot.name().toLowerCase(java.util.Locale.ROOT);
+                String value = armor.isEmpty() || !armor.isDamageableItem() ? "N/A"
+                        : (armor.getMaxDamage() - armor.getDamageValue()) + " / " + armor.getMaxDamage();
+                drawLine(graphics, client, x, y, 180, "Armor " + label + "  " + value);
                 y += 24;
             }
         }
