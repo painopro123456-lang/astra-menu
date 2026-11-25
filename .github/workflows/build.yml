@@ -37,6 +37,7 @@ jobs:
           jar tf "$JAR" | grep -q 'dfu_fast.mixins.json'
           jar tf "$JAR" | grep -q 'dev/crystallmoon/dfufast/DfuFast.class'
           jar tf "$JAR" | grep -q 'dev/crystallmoon/dfufast/mixin/SharedConstantsMixin.class'
+          grep -q 'public static void enableDataFixerOptimization()' src/main/java/dev/crystallmoon/dfufast/mixin/SharedConstantsMixin.java
           unzip -p "$JAR" fabric.mod.json | grep -q 'dfu_fast.mixins.json'
           unzip -p "$JAR" dfu_fast.mixins.json | grep -q 'SharedConstantsMixin'
           echo "Verified mod metadata, mixin registration, mixin config, and classes in $JAR"
