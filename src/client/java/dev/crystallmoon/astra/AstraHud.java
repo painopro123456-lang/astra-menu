@@ -122,9 +122,65 @@ public final class AstraHud {
             drawKey(graphics, client, center + 12, keyY + 23, "D", client.options.keyRight.isDown());
             drawKey(graphics, client, center - 12, keyY + 46, "J", client.options.keyJump.isDown());
         }
+
         if (AstraModules.isEnabled("Item Counter")) {
             ItemStack held = client.player.getMainHandItem();
             drawLine(graphics, client, x, y, 125, "Held item  " + (held.isEmpty() ? "None" : held.getCount()));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Block Coordinates")) {
+            drawLine(graphics, client, x, y, 150, "Block  " + client.player.blockPosition().toShortString());
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Chunk Coordinates")) {
+            var pos = client.player.blockPosition();
+            drawLine(graphics, client, x, y, 150, "Chunk  " + (pos.getX() >> 4) + "  " + (pos.getZ() >> 4));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Yaw Pitch")) {
+            drawLine(graphics, client, x, y, 150, String.format("Yaw  %.1f   Pitch  %.1f",
+                    client.player.getYRot(), client.player.getXRot()));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Absorption")) {
+            drawLine(graphics, client, x, y, 140, String.format("Absorption  %.1f",
+                    client.player.getAbsorptionAmount()));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Air HUD")) {
+            drawLine(graphics, client, x, y, 120, "Air  " + client.player.getAirSupply()
+                    + " / " + client.player.getMaxAirSupply());
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Memory Usage")) {
+            Runtime runtime = Runtime.getRuntime();
+            long used = (runtime.totalMemory() - runtime.freeMemory()) / (1024L * 1024L);
+            long max = runtime.maxMemory() / (1024L * 1024L);
+            drawLine(graphics, client, x, y, 145, "Memory  " + used + " / " + max + " MB");
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Java Version")) {
+            drawLine(graphics, client, x, y, 170, "Java  " + System.getProperty("java.version"));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Weather")) {
+            drawLine(graphics, client, x, y, 125, "Weather  " + (client.level.isRaining() ? "Rain" : "Clear"));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Day Counter") || AstraModules.isEnabled("World Age")) {
+            long dayTime = client.level.getLevelData().getDayTime();
+            if (AstraModules.isEnabled("Day Counter")) {
+                drawLine(graphics, client, x, y, 120, "Day  " + (dayTime / 24000L + 1));
+                y += 24;
+            }
+            if (AstraModules.isEnabled("World Age")) {
+                drawLine(graphics, client, x, y, 145, "World age  " + dayTime + " ticks");
+                y += 24;
+            }
+        }
+        if (AstraModules.isEnabled("Difficulty")) {
+            drawLine(graphics, client, x, y, 145, "Difficulty  " + client.level.getDifficulty());
+            y += 24;
         }
     }
 
