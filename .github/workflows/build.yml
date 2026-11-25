@@ -29,18 +29,21 @@ jobs:
       - name: Build mod JAR
         run: gradle --no-daemon clean jar
 
-      - name: Verify JAR contents
+      - name: Verify JAR contents and DFU hook
         run: |
+          set -euo pipefail
           JAR="$(find build/libs -maxdepth 1 -type f -name 'dfu-fast-*.jar' -print -quit)"
           test -n "$JAR"
           jar tf "$JAR" | grep -q 'fabric.mod.json'
           jar tf "$JAR" | grep -q 'dfu_fast.mixins.json'
           jar tf "$JAR" | grep -q 'dev/crystallmoon/dfufast/DfuFast.class'
           jar tf "$JAR" | grep -q 'dev/crystallmoon/dfufast/mixin/SharedConstantsMixin.class'
-          grep -q 'public static void enableDataFixerOptimization()' src/main/java/dev/crystallmoon/dfufast/mixin/SharedConstantsMixin.java
+          grep -q 'method = "enableDataFixerOptimization"' src/main/java/dev/crystallmoon/dfufast/mixin/SharedConstantsMixin.java
+          grep -q 'cancellable = true' src/main/java/dev/crystallmoon/dfufast/mixin/SharedConstantsMixin.java
+          grep -q 'require = 1' src/main/java/dev/crystallmoon/dfufast/mixin/SharedConstantsMixin.java
           unzip -p "$JAR" fabric.mod.json | grep -q 'dfu_fast.mixins.json'
           unzip -p "$JAR" dfu_fast.mixins.json | grep -q 'SharedConstantsMixin'
-          echo "Verified mod metadata, mixin registration, mixin config, and classes in $JAR"
+          echo "Verified mod metadata, registered required DFU injection, mixin config, and classes in $JAR"
 
       - name: Publish JAR release asset
         uses: softprops/action-gh-release@v2
