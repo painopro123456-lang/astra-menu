@@ -28,6 +28,9 @@ public final class AstraHud {
     private static final int[] PING_SAMPLES = new int[32];
     private static int graphIndex;
     private static long lastGraphSample;
+    private static float previousHealth = -1.0f;
+    private static float lastDamageAmount;
+    private static long lastDamageNanos;
 
     private AstraHud() {}
 
@@ -43,6 +46,12 @@ public final class AstraHud {
         }
 
         long now = System.nanoTime();
+        float currentHealth = client.player.getHealth();
+        if (previousHealth >= 0.0f && currentHealth < previousHealth) {
+            lastDamageAmount = previousHealth - currentHealth;
+            lastDamageNanos = now;
+        }
+        previousHealth = currentHealth;
         long window = client.getWindow().getWindow();
         boolean leftDown = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
         boolean rightDown = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS;
@@ -380,6 +389,28 @@ public final class AstraHud {
         if (AstraModules.isEnabled("Ping Graph")) {
             drawGraph(graphics, x, y, "PING", PING_SAMPLES, 240);
             y += 52;
+        }
+        if (AstraModules.isEnabled("Target HUD") && client.hitResult instanceof net.minecraft.world.phys.EntityHitResult entityHit) {
+            var target = entityHit.getEntity();
+            drawLine(graphics, client, x, y, 220, "Target  " + target.getName().getString());
+            y += 24;
+            if (target instanceof net.minecraft.world.entity.LivingEntity living) {
+                drawLine(graphics, client, x, y, 190, String.format("Target health  %.1f / %.1f",
+                        living.getHealth(), living.getMaxHealth()));
+                y += 24;
+            }
+        }
+        if (AstraModules.isEnabled("Last Damage") && lastDamageNanos > 0L) {
+            long seconds = (now - lastDamageNanos) / 1_000_000_000L;
+            drawLine(graphics, client, x, y, 170, String.format("Last damage  %.1f ( %ds ago )",
+                    lastDamageAmount, seconds));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Combat Timer")) {
+            long seconds = lastDamageNanos == 0L ? -1L : (now - lastDamageNanos) / 1_000_000_000L;
+            drawLine(graphics, client, x, y, 160, seconds < 0 ? "Combat  No recent damage"
+                    : "Combat  " + seconds + "s since hit");
+            y += 24;
         }
         if (AstraModules.isEnabled("Server Address")) {
             var server = client.getCurrentServer();
