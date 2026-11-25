@@ -301,6 +301,77 @@ public final class AstraHud {
             drawLine(graphics, client, x, y, 190, "Dimension ID  " + client.level.dimension().identifier());
             y += 24;
         }
+        if (AstraModules.isEnabled("Server Address")) {
+            var server = client.getCurrentServer();
+            drawLine(graphics, client, x, y, 210, "Server  " + (server == null ? "Singleplayer" : server.ip));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Nearby Players")) {
+            int count = client.level.players().size();
+            drawLine(graphics, client, x, y, 155, "Players nearby  " + count);
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Entity Counter") || AstraModules.isEnabled("Mob Counter")
+                || AstraModules.isEnabled("Nearby Entities") || AstraModules.isEnabled("Dropped Items")
+                || AstraModules.isEnabled("Projectile Counter")) {
+            int entities = 0, mobs = 0, items = 0, projectiles = 0;
+            for (var entity : client.level.entitiesForRendering()) {
+                if (entity == client.player) continue;
+                entities++;
+                if (entity instanceof net.minecraft.world.entity.LivingEntity) mobs++;
+                if (entity instanceof net.minecraft.world.entity.item.ItemEntity) items++;
+                if (entity instanceof net.minecraft.world.entity.projectile.Projectile) projectiles++;
+            }
+            if (AstraModules.isEnabled("Entity Counter") || AstraModules.isEnabled("Nearby Entities")) {
+                drawLine(graphics, client, x, y, 150, "Loaded entities  " + entities); y += 24;
+            }
+            if (AstraModules.isEnabled("Mob Counter")) {
+                drawLine(graphics, client, x, y, 120, "Living entities  " + mobs); y += 24;
+            }
+            if (AstraModules.isEnabled("Dropped Items")) {
+                drawLine(graphics, client, x, y, 120, "Dropped items  " + items); y += 24;
+            }
+            if (AstraModules.isEnabled("Projectile Counter")) {
+                drawLine(graphics, client, x, y, 120, "Projectiles  " + projectiles); y += 24;
+            }
+        }
+        if (AstraModules.isEnabled("Target Block") || AstraModules.isEnabled("Looking At")
+                || AstraModules.isEnabled("Block Info")) {
+            if (client.hitResult instanceof net.minecraft.world.phys.BlockHitResult hit) {
+                var pos = hit.getBlockPos();
+                var state = client.level.getBlockState(pos);
+                drawLine(graphics, client, x, y, 220, "Looking at  " + state.getBlock().getName().getString());
+                y += 24;
+                if (AstraModules.isEnabled("Target Block") || AstraModules.isEnabled("Block Info")) {
+                    drawLine(graphics, client, x, y, 220, "Block pos  " + pos.toShortString());
+                    y += 24;
+                }
+            } else if (AstraModules.isEnabled("Looking At")) {
+                drawLine(graphics, client, x, y, 150, "Looking at  Nothing");
+                y += 24;
+            }
+        }
+        if (AstraModules.isEnabled("Durability") || AstraModules.isEnabled("Tool Durability")
+                || AstraModules.isEnabled("Armor Durability")) {
+            ItemStack tool = client.player.getMainHandItem();
+            if (!tool.isEmpty() && tool.isDamageableItem()) {
+                drawLine(graphics, client, x, y, 180, "Tool durability  "
+                        + Math.max(0, tool.getMaxDamage() - tool.getDamageValue()) + " / " + tool.getMaxDamage());
+                y += 24;
+            } else if (AstraModules.isEnabled("Tool Durability") || AstraModules.isEnabled("Durability")) {
+                drawLine(graphics, client, x, y, 150, "Tool durability  N/A");
+                y += 24;
+            }
+        }
+        if (AstraModules.isEnabled("Hotbar")) {
+            StringBuilder hotbar = new StringBuilder("Hotbar  ");
+            for (int i = 0; i < 9; i++) {
+                ItemStack stack = client.player.getInventory().getItem(i);
+                hotbar.append(stack.isEmpty() ? "-" : stack.getCount()).append("  ");
+            }
+            drawLine(graphics, client, x, y, 220, hotbar.toString());
+            y += 24;
+        }
         if (AstraModules.isEnabled("Spawnable Light")) {
             int light = client.level.getMaxLocalRawBrightness(client.player.blockPosition());
             drawLine(graphics, client, x, y, 165, "Spawn light  " + light + (light < 8 ? "  (hostile spawn risk)" : ""));
