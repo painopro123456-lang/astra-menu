@@ -178,6 +178,43 @@ public final class AstraHud {
                 y += 24;
             }
         }
+        if (AstraModules.isEnabled("Biome")) {
+            String biome = client.level.getBiome(client.player.blockPosition()).unwrapKey().map(k -> k.location().toString()).orElse("Unknown");
+            drawLine(graphics, client, x, y, 190, "Biome  " + biome); y += 24;
+        }
+        if (AstraModules.isEnabled("Nether Coordinates")) {
+            boolean nether = client.level.dimension().location().getPath().equals("the_nether");
+            double scale = nether ? 8.0 : 0.125;
+            drawLine(graphics, client, x, y, 190, "Nether XYZ  " + (int)(client.player.getX()*scale) + "  " + (int)client.player.getY() + "  " + (int)(client.player.getZ()*scale)); y += 24;
+        }
+        if (AstraModules.isEnabled("Real Time")) {
+            drawLine(graphics, client, x, y, 130, "Real time  " + CLOCK.format(LocalTime.now())); y += 24;
+        }
+        if (AstraModules.isEnabled("Facing") || AstraModules.isEnabled("Compass")) {
+            String[] points = {"S","SW","W","NW","N","NE","E","SE"};
+            String point = points[Math.floorMod(Math.round(client.player.getYRot()/45.0f), 8)];
+            drawLine(graphics, client, x, y, 130, "Compass  " + point); y += 24;
+        }
+        if (AstraModules.isEnabled("Held Item")) {
+            ItemStack held = client.player.getMainHandItem();
+            drawLine(graphics, client, x, y, 190, "Held  " + (held.isEmpty() ? "Empty" : held.getHoverName().getString())); y += 24;
+        }
+        if (AstraModules.isEnabled("Offhand Item")) {
+            ItemStack held = client.player.getOffhandItem();
+            drawLine(graphics, client, x, y, 190, "Offhand  " + (held.isEmpty() ? "Empty" : held.getHoverName().getString())); y += 24;
+        }
+        if (AstraModules.isEnabled("Rain Status")) {
+            drawLine(graphics, client, x, y, 130, "Rain  " + (client.level.isRaining() ? "Yes" : "No")); y += 24;
+        }
+        if (AstraModules.isEnabled("Moon Phase")) {
+            drawLine(graphics, client, x, y, 130, "Moon phase  " + client.level.getMoonPhase()); y += 24;
+        }
+        if (AstraModules.isEnabled("Client Version")) {
+            drawLine(graphics, client, x, y, 160, "Minecraft  26.2"); y += 24;
+        }
+        if (AstraModules.isEnabled("Toggle Sprint")) {
+            drawLine(graphics, client, x, y, 130, "Sprint  " + (client.player.isSprinting() ? "ON" : "OFF")); y += 24;
+        }
         if (AstraModules.isEnabled("Difficulty")) {
             drawLine(graphics, client, x, y, 145, "Difficulty  " + client.level.getDifficulty());
             y += 24;
