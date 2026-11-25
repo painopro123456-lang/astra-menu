@@ -52,7 +52,7 @@ public final class AstraHud {
             lastDamageNanos = now;
         }
         previousHealth = currentHealth;
-        long window = client.getWindow().getWindow();
+        long window = GLFW.glfwGetCurrentContext();
         boolean leftDown = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
         boolean rightDown = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS;
         if (leftDown && !leftWasDown || rightDown && !rightWasDown) CLICK_TIMES.addLast(now);
