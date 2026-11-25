@@ -428,6 +428,11 @@ public final class AstraHud {
             drawLine(graphics, client, x, y, 210, "Server  " + (server == null ? "Singleplayer" : server.ip));
             y += 24;
         }
+        if (AstraModules.isEnabled("Server Brand")) {
+            String brand = client.player.getServerBrand();
+            drawLine(graphics, client, x, y, 210, "Server brand  " + (brand == null || brand.isBlank() ? "Unknown" : brand));
+            y += 24;
+        }
         if (AstraModules.isEnabled("Nearby Players")) {
             int count = (int) client.level.players().stream().filter(player -> player != client.player)
                     .filter(player -> player.distanceToSqr(client.player) <= 64.0 * 64.0).count();
@@ -533,6 +538,15 @@ public final class AstraHud {
                 if (AstraModules.isEnabled("Mining Speed")) {
                     drawLine(graphics, client, x, y, 190, String.format("Mining speed  %.2f",
                             client.player.getDestroySpeed(state)));
+                    y += 24;
+                }
+                if (AstraModules.isEnabled("Breaking Progress")) {
+                    boolean attacking = client.options.keyAttack.isDown();
+                    float progress = client.gameMode == null || !attacking ? 0.0f
+                            : client.gameMode.getDestroyProgress(state, pos);
+                    drawLine(graphics, client, x, y, 190, attacking
+                            ? String.format("Breaking progress  %.0f%%", Math.min(100.0f, progress * 100.0f))
+                            : "Breaking progress  Hold attack");
                     y += 24;
                 }
                 if (AstraModules.isEnabled("Harvest Level")) {
