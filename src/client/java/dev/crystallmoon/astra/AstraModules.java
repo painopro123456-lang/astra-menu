@@ -104,6 +104,11 @@ public final class AstraModules {
   add("Effect Duration", false);
   add("Combat Timer", false);
   add("Last Damage", false);
+  add("Last Location", false);
+  add("Waypoint HUD", false);
+  add("Waypoint Distance", false);
+  add("Compass HUD", false);
+  add("Direction HUD", false);
  }
  private static void add(String n,boolean e){STATES.put(n,e);}
  private AstraModules(){}
