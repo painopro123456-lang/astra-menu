@@ -1,16 +1,18 @@
 # DFU Fast
 
-A small client-side Fabric startup diagnostic for Minecraft **26.2**.
+A small client-side Fabric mod for Minecraft **26.2** that defers eager DataFixerUpper (DFU) migration-rule baking.
 
-## What it does
+## What it changes
 
-When Fabric begins client initialization, DFU Fast logs how many milliseconds have elapsed since the Java virtual machine started.
+DFU Fast replaces Minecraft's `SharedConstants.enableDataFixerOptimizations()` method with a no-op. This prevents that startup call from eagerly baking every historical DFU migration rule.
 
-This gives us a repeatable checkpoint in the startup log. It does not preload DFU classes, alter DataFixerUpper, skip data conversion, modify worlds, or compete with Minecraft's startup thread.
+DFU itself is not removed. Minecraft can still build and use the required migration rules later when they are needed to load or upgrade older data. That deferred work may cause a pause the first time it is needed.
 
-## Performance note
+## Performance expectations
 
-This build is diagnostic-only. It does **not** claim to make Minecraft launch faster. The checkpoint helps identify whether time is being spent before Fabric client initialization; the full launch bottleneck still needs to be measured using launcher timing and the Minecraft log.
+This targets one specific part of startup: DFU rule initialization. It does not speed up Fabric mod discovery, resource loading, Java startup, or other launch work.
+
+Mojang significantly improved DFU initialization starting in Minecraft 1.19.4, so the benefit on modern versions can be small and depends on the machine and game build. No specific time saving is guaranteed; compare repeated launches with and without the mod to measure your result.
 
 ## Compatibility
 
@@ -20,6 +22,8 @@ This build is diagnostic-only. It does **not** claim to make Minecraft launch fa
 - Client-side only
 - No Fabric API dependency
 
-## Safety
+## Safety and testing
 
-This mod only reads JVM uptime and writes a log message. It does not edit worlds, change DataFixer rules, or alter vanilla startup behavior.
+The mod changes when DFU migration rules are prepared, not the conversion rules themselves. Nevertheless, back up important worlds before testing any mod that changes world-data initialization. Test an older world only on a copy and allow any deferred migration work to finish.
+
+If the game crashes on startup, remove DFU Fast and share the crash log so the mixin can be checked against that exact game build.
