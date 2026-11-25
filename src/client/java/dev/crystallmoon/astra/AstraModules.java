@@ -15,6 +15,10 @@ public final class AstraModules {
         STATES.put("Direction", true);
         STATES.put("Status Effects", false);
         STATES.put("Toggle Sprint", false);
+        STATES.put("Clock", true);
+        STATES.put("Health HUD", false);
+        STATES.put("Ping Display", false);
+        STATES.put("Item Counter", false);
     }
 
     private AstraModules() {}
