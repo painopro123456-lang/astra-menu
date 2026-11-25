@@ -4,7 +4,7 @@ A small client-side Fabric mod for Minecraft **26.2** that defers eager DataFixe
 
 ## What it changes
 
-DFU Fast replaces Minecraft's `SharedConstants.enableDataFixerOptimizations()` method with a no-op. This prevents that startup call from eagerly baking every historical DFU migration rule.
+DFU Fast replaces Minecraft's `SharedConstants.enableDataFixerOptimization()` method with a no-op. This prevents that startup call from eagerly baking every historical DFU migration rule.
 
 DFU itself is not removed. Minecraft can still build and use the required migration rules later when they are needed to load or upgrade older data. That deferred work may cause a pause the first time it is needed.
 
