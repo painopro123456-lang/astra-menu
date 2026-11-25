@@ -277,12 +277,13 @@ public final class AstraHud {
                 if (item.equals("totem_of_undying")) totems += stack.getCount();
                 if (item.contains("arrow")) arrows += stack.getCount();
                 if (item.contains("potion")) potions += stack.getCount();
+                if (stack.getItem().getFoodProperties(stack, client.player) != null) food += stack.getCount();
                 
             }
             if (AstraModules.isEnabled("Inventory Status") || AstraModules.isEnabled("Empty Slots")) { drawLine(graphics, client, x, y, 155, "Empty slots  " + empty); y += 24; }
             if (AstraModules.isEnabled("Totem Counter")) { drawLine(graphics, client, x, y, 125, "Totems  " + totems); y += 24; }
             if (AstraModules.isEnabled("Arrow Counter")) { drawLine(graphics, client, x, y, 125, "Arrows  " + arrows); y += 24; }
-            if (AstraModules.isEnabled("Food Counter")) { drawLine(graphics, client, x, y, 125, "Food level  " + client.player.getFoodData().getFoodLevel() + "/20"); y += 24; }
+            if (AstraModules.isEnabled("Food Counter")) { drawLine(graphics, client, x, y, 125, "Food items  " + food); y += 24; }
             if (AstraModules.isEnabled("Potion Counter")) { drawLine(graphics, client, x, y, 125, "Potions  " + potions); y += 24; }
         }
         if (AstraModules.isEnabled("Status Effects") || AstraModules.isEnabled("Potion Timers")
@@ -421,7 +422,8 @@ public final class AstraHud {
             y += 24;
         }
         if (AstraModules.isEnabled("Nearby Players")) {
-            int count = client.level.players().size();
+            int count = (int) client.level.players().stream().filter(player -> player != client.player)
+                    .filter(player -> player.distanceToSqr(client.player) <= 64.0 * 64.0).count();
             drawLine(graphics, client, x, y, 155, "Players nearby  " + count);
             y += 24;
         }
@@ -432,12 +434,19 @@ public final class AstraHud {
             for (var entity : client.level.entitiesForRendering()) {
                 if (entity == client.player) continue;
                 entities++;
-                if (entity instanceof net.minecraft.world.entity.LivingEntity) mobs++;
+                if (entity instanceof net.minecraft.world.entity.LivingEntity
+                        && !(entity instanceof net.minecraft.world.entity.player.Player)) mobs++;
                 if (entity instanceof net.minecraft.world.entity.item.ItemEntity) items++;
                 if (entity instanceof net.minecraft.world.entity.projectile.Projectile) projectiles++;
             }
-            if (AstraModules.isEnabled("Entity Counter") || AstraModules.isEnabled("Nearby Entities")) {
+            if (AstraModules.isEnabled("Entity Counter")) {
                 drawLine(graphics, client, x, y, 150, "Loaded entities  " + entities); y += 24;
+            }
+            if (AstraModules.isEnabled("Nearby Entities")) {
+                long nearby = client.level.entitiesForRendering().stream()
+                        .filter(entity -> entity != client.player)
+                        .filter(entity -> entity.distanceToSqr(client.player) <= 32.0 * 32.0).count();
+                drawLine(graphics, client, x, y, 150, "Nearby entities  " + nearby); y += 24;
             }
             if (AstraModules.isEnabled("Mob Counter")) {
                 drawLine(graphics, client, x, y, 120, "Living entities  " + mobs); y += 24;
@@ -487,7 +496,8 @@ public final class AstraHud {
             y += 24;
         }
         if (AstraModules.isEnabled("Player Counter")) {
-            drawLine(graphics, client, x, y, 155, "Players in world  " + client.level.players().size());
+            long players = client.level.players().stream().filter(player -> player != client.player).count();
+            drawLine(graphics, client, x, y, 155, "Other players  " + players);
             y += 24;
         }
         if (AstraModules.isEnabled("Coordinates HUD")) {
@@ -504,8 +514,7 @@ public final class AstraHud {
             graphics.fill(cx, cy + 3, cx + 1, cy + 7, WHITE);
         }
         if (AstraModules.isEnabled("Block Resistance") || AstraModules.isEnabled("Mining Speed")
-                || AstraModules.isEnabled("Harvest Level") || AstraModules.isEnabled("Breaking Progress")
-                || AstraModules.isEnabled("Light Overlay")) {
+                || AstraModules.isEnabled("Harvest Level") || AstraModules.isEnabled("Light Overlay")) {
             if (client.hitResult instanceof net.minecraft.world.phys.BlockHitResult blockHit) {
                 var pos = blockHit.getBlockPos();
                 var state = client.level.getBlockState(pos);
@@ -519,11 +528,6 @@ public final class AstraHud {
                             client.player.getDestroySpeed(state)));
                     y += 24;
                 }
-                if (AstraModules.isEnabled("Breaking Progress")) {
-                    drawLine(graphics, client, x, y, 190, "Breaking progress  " +
-                            (client.gameMode == null ? "N/A" : "Hold attack to mine"));
-                    y += 24;
-                }
                 if (AstraModules.isEnabled("Harvest Level")) {
                     drawLine(graphics, client, x, y, 190, "Harvest tool  " +
                             (client.player.getMainHandItem().isCorrectToolForDrops(state) ? "Suitable" : "Not suitable"));
@@ -534,7 +538,7 @@ public final class AstraHud {
                     drawLine(graphics, client, x, y, 190, "Block light  " + light);
                     y += 24;
                 }
-            } else if (AstraModules.isEnabled("Breaking Progress") || AstraModules.isEnabled("Mining Speed")
+            } else if (AstraModules.isEnabled("Mining Speed")
                     || AstraModules.isEnabled("Block Resistance") || AstraModules.isEnabled("Harvest Level")
                     || AstraModules.isEnabled("Light Overlay")) {
                 drawLine(graphics, client, x, y, 190, "Block details  Look at a block");
