@@ -1,16 +1,16 @@
 # DFU Fast
 
-A small client-side Fabric mod for Minecraft **26.2**.
+A small client-side Fabric startup diagnostic for Minecraft **26.2**.
 
 ## What it does
 
-DFU Fast starts a low-priority daemon thread during client initialization and asks the class loader to load a small set of DataFixerUpper-related classes.
+When Fabric begins client initialization, DFU Fast logs how many milliseconds have elapsed since the Java virtual machine started.
 
-It uses non-initializing class loading. It does **not** run static initializers, create a replacement DataFixer, alter world data, skip migrations, or delay vanilla work until later.
+This gives us a repeatable checkpoint in the startup log. It does not preload DFU classes, alter DataFixerUpper, skip data conversion, modify worlds, or compete with Minecraft's startup thread.
 
 ## Performance note
 
-This is a conservative startup experiment, not a guaranteed large launch-time boost. It may move some class-loading work away from the main thread, but JVM verification/linking may still happen later, and asset loading, other mods, storage speed, or CPU contention may dominate startup. Compare several cold launches with and without the mod.
+This build is diagnostic-only. It does **not** claim to make Minecraft launch faster. The checkpoint helps identify whether time is being spent before Fabric client initialization; the full launch bottleneck still needs to be measured using launcher timing and the Minecraft log.
 
 ## Compatibility
 
@@ -20,16 +20,6 @@ This is a conservative startup experiment, not a guaranteed large launch-time bo
 - Client-side only
 - No Fabric API dependency
 
-## Build
-
-Use JDK 25 and Gradle 9.6.1:
-
-```sh
-gradle build
-```
-
-The mod jar is written to `build/libs/`.
-
 ## Safety
 
-DFU Fast never edits worlds, changes DataFixer rules, disables data conversion, or replaces vanilla's DataFixerUpper implementation.
+This mod only reads JVM uptime and writes a log message. It does not edit worlds, change DataFixer rules, or alter vanilla startup behavior.
