@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 public final class AstraScreen extends Screen {
     private static final int BG=0xE910131A, PANEL=0xF51B202A, CARD=0xE9252C38;
     private static final int ACCENT=0xFF9BC7FF, WHITE=0xFFF4F7FC, MUTED=0xFF9AA7B8;
-    private static final String[] CATEGORIES={"All","HUD","Player","World","Items","Visual","Network"};
+    private static final String[] CATEGORIES={"All","HUD","Player","World","Items","Visual"};
     private static final int PAGE_SIZE=12;
     private String category="All", selectedModule=null;
     private int page=0;
@@ -61,7 +61,6 @@ public final class AstraScreen extends Screen {
         if(List.of("World Clock","World Day","World Age","Biome Info","Weather Info","Moon Phase","Dimension Info","Light Level","Chunk Position","Region Position","Block Position","Nether Position","Facing Direction","Target Block Info","Block Resistance","Mining Progress","Mining Speed","Tool Suitability","Spawn Light","World Difficulty","World Seed Info").contains(n)) return "World";
         if(List.of("Held Item Info","Offhand Info","Hotbar Status","Inventory Slots","Empty Slot Count","Container Info","Shulker Preview","Bundle Preview","Item Rarity","Item Components","Item Enchantments","Durability Warning","Armor Durability","Tool Durability","Selected Slot","Stack Count","Food Item Info","Potion Item Info","Map Info").contains(n)) return "Items";
         if(List.of("Clean HUD","Minimal Boss Bars","Custom Crosshair","Damage Flash Control","Fire Overlay Control","Pumpkin Overlay Control","Vignette Control","Weather Particles","Entity Outlines","Dropped Item Labels","Name Tag Distance","Chat Timestamps","Scoreboard Timer","Subtitle History","Toast History","Screenshot Indicator","Camera Coordinates","FOV Display","Gamma Display","Particle Counter").contains(n)) return "Visual";
-        if(List.of("Connection Status","Server Address","Server Brand","Server Latency","Latency Graph","Packet Statistics","Server TPS Estimate","Chunk Load Counter","Network Diagnostics","Connection Uptime","Reconnect Reminder","Server Version","Client Version","Java Runtime","Memory Monitor","Garbage Collection Info","Loaded Entity Count","World Render Distance","Chunk Update Rate").contains(n)) return "Network";
         return "All";
     }
 
