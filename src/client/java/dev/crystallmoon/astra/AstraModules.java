@@ -11,123 +11,63 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Astra's curated module registry.
+ *
+ * Every entry here has a corresponding implementation in AstraHud.
+ * Keep this list honest: do not register a module until its behaviour exists.
+ */
 public final class AstraModules {
     private static final Map<String, Boolean> STATES = new LinkedHashMap<>();
     private static final Path CONFIG_FILE = FabricLoader.getInstance()
             .getConfigDir().resolve("astra-menu.properties");
 
     static {
-        // HUD (27)
-        add("FPS", false);
-        add("Coordinates", false);
-        add("Direction", false);
-        add("Clock", false);
-        add("Ping", false);
-        add("CPS", false);
-        add("Keystrokes", false);
-        add("Armor", false);
-        add("Health", false);
-        add("Hunger", false);
-        add("Saturation", false);
-        add("Experience", false);
-        add("Speed", false);
-        add("Velocity", false);
-        add("Jump Height", false);
-        add("Fall Distance", false);
-        add("Status Effects", false);
-        add("Potion Timers", false);
-        add("Durability", false);
-        add("Item Count", false);
-        add("Totem Count", false);
-        add("Arrow Count", false);
-        add("Food Count", false);
-        add("Entity Count", false);
-        add("Player Count", false);
-        add("Mob Count", false);
-        add("Boss Bar", false);
-        // Player (19)
-        add("Movement Info", false);
-        add("Sprint Indicator", false);
-        add("Sneak Indicator", false);
-        add("Flight Indicator", false);
-        add("Elytra Info", false);
-        add("Mount Info", false);
-        add("Vehicle Speed", false);
-        add("Reach Display", false);
-        add("Attack Cooldown", false);
-        add("Hurt Time", false);
-        add("Last Hit", false);
-        add("Combat Duration", false);
-        add("Player Model Info", false);
-        add("Skin Info", false);
-        add("UUID Display", false);
-        add("Game Mode Info", false);
-        add("Player List", false);
-        add("Nearby Players", false);
-        add("Player Health", false);
-        // World (21)
-        add("World Clock", false);
-        add("World Day", false);
-        add("World Age", false);
-        add("Biome Info", false);
-        add("Weather Info", false);
-        add("Moon Phase", false);
-        add("Dimension Info", false);
-        add("Light Level", false);
-        add("Chunk Position", false);
-        add("Region Position", false);
-        add("Block Position", false);
-        add("Nether Position", false);
-        add("Facing Direction", false);
-        add("Target Block Info", false);
-        add("Block Resistance", false);
-        add("Mining Progress", false);
-        add("Mining Speed", false);
-        add("Tool Suitability", false);
-        add("Spawn Light", false);
-        add("World Difficulty", false);
-        add("World Seed Info", false);
-        // Items (19)
-        add("Held Item Info", false);
-        add("Offhand Info", false);
-        add("Hotbar Status", false);
-        add("Inventory Slots", false);
-        add("Empty Slot Count", false);
-        add("Container Info", false);
-        add("Shulker Preview", false);
-        add("Bundle Preview", false);
-        add("Item Rarity", false);
-        add("Item Components", false);
-        add("Item Enchantments", false);
-        add("Durability Warning", false);
-        add("Armor Durability", false);
-        add("Tool Durability", false);
-        add("Selected Slot", false);
-        add("Stack Count", false);
-        add("Food Item Info", false);
-        add("Potion Item Info", false);
-        add("Map Info", false);
-        // Visual (20)
-        add("Clean HUD", false);
-        add("Minimal Boss Bars", false);
-        add("Custom Crosshair", false);
-        add("Damage Flash Control", false);
-        add("Fire Overlay Control", false);
-        add("Pumpkin Overlay Control", false);
-        add("Vignette Control", false);
-        add("Weather Particles", false);
-        add("Entity Outlines", false);
-        add("Dropped Item Labels", false);
-        add("Name Tag Distance", false);
-        add("Chat Timestamps", false);
-        add("Scoreboard Timer", false);
-        add("Subtitle History", false);
-        add("Toast History", false);
-        add("Screenshot Indicator", false);
-        add("Camera Coordinates", false);
-        add("FOV Display", false);
-        add("Gamma Display", false);
-        add("Particle Counter", false);
+        add("FPS Counter", false); // HUD
+        add("Coordinates", false); // HUD
+        add("Direction", false); // HUD
+        add("Clock", false); // HUD
+        add("Ping Display", false); // HUD
+        add("CPS Counter", false); // HUD
+        add("Keystrokes", false); // HUD
+        add("Armor Status", false); // HUD
+        add("Health HUD", false); // HUD
+        add("Hunger HUD", false); // HUD
+        add("Experience HUD", false); // HUD
+        add("Speedometer", false); // HUD
+        add("Status Effects", false); // HUD
+        add("Potion Timers", false); // HUD
+        add("Jump Height", false); // HUD
+        add("Sprint Status", false); // Player
+        add("Movement Speed", false); // Player
+        add("Velocity", false); // Player
+        add("Elytra Speed", false); // Player
+        add("Vehicle HUD", false); // Player
+        add("Game Mode", false); // Player
+        add("World Time", false); // World
+        add("Dimension", false); // World
+        add("Light Level", false); // World
+        add("Day Counter", false); // World
+        add("Biome", false); // World
+        add("Nether Coordinates", false); // World
+        add("Weather", false); // World
+        add("Moon Phase", false); // World
+        add("Difficulty", false); // World
+        add("Spawnable Light", false); // World
+        add("Block Info", false); // World
+        add("Mining Speed", false); // World
+        add("Item Counter", false); // Items
+        add("Inventory Status", false); // Items
+        add("Empty Slots", false); // Items
+        add("Totem Counter", false); // Items
+        add("Arrow Counter", false); // Items
+        add("Potion Counter", false); // Items
+        add("Durability", false); // Items
+        add("Armor Durability", false); // Items
+        add("Hotbar", false); // Items
+        add("Crosshair", false); // Visual
+        add("Effect Icons", false); // Visual
+        add("Target HUD", false); // Visual
     }
 
     private AstraModules() {}
