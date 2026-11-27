@@ -128,26 +128,6 @@ public final class AstraModules {
         add("FOV Display", false);
         add("Gamma Display", false);
         add("Particle Counter", false);
-        // Network (19)
-        add("Connection Status", false);
-        add("Server Address", false);
-        add("Server Brand", false);
-        add("Server Latency", false);
-        add("Latency Graph", false);
-        add("Packet Statistics", false);
-        add("Server TPS Estimate", false);
-        add("Chunk Load Counter", false);
-        add("Network Diagnostics", false);
-        add("Connection Uptime", false);
-        add("Reconnect Reminder", false);
-        add("Server Version", false);
-        add("Client Version", false);
-        add("Java Runtime", false);
-        add("Memory Monitor", false);
-        add("Garbage Collection Info", false);
-        add("Loaded Entity Count", false);
-        add("World Render Distance", false);
-        add("Chunk Update Rate", false);
     }
 
     private AstraModules() {}
