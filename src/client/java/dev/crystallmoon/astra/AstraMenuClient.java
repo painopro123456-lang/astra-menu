@@ -1,11 +1,33 @@
 package dev.crystallmoon.astra;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.resources.Identifier;
+import org.lwjgl.glfw.GLFW;
 
-/** Minimal client entrypoint. Astra's previous menu, modules, HUD and mixins have been removed. */
 public final class AstraMenuClient implements ClientModInitializer {
+    private static KeyMapping openMenu;
+
     @Override
     public void onInitializeClient() {
-        // Intentionally empty: clean slate for a future rebuild.
+        AstraModules.load();
+        openMenu = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                "key.astra_menu.open", GLFW.GLFW_KEY_RIGHT_SHIFT, KeyMapping.Category.MISC));
+
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents.CHUNK_LOAD.register(
+                (world, chunk) -> AstraHud.noteChunkUpdate());
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents.CHUNK_UNLOAD.register(
+                (world, chunk) -> AstraHud.noteChunkUpdate());
+
+        HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("astra_menu", "classic_hud"), AstraHud::extract);
+
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            while (openMenu.consumeClick()) {
+                if (client.gui.screen() instanceof AstraScreen) client.gui.setScreen(null);
+                else if (client.player != null) client.gui.setScreen(new AstraScreen());
+            }
+        });
     }
 }
