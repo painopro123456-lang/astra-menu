@@ -167,24 +167,43 @@ public final class AstraHud {
             }
         }
         if (AstraModules.isEnabled("Armor Status")) {
-            StringBuilder armor = new StringBuilder("Armor  ");
-            for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
-                ItemStack stack = client.player.getItemBySlot(slot);
-                armor.append(stack.isEmpty() ? "--" : stack.getMaxDamage() > 0
-                        ? Math.max(0, stack.getMaxDamage() - stack.getDamageValue()) : stack.getCount());
-                armor.append("  ");
+            int armorX = 8;
+            int armorY = client.getWindow().getGuiScaledHeight() - 42;
+            graphics.fill(armorX - 4, armorY - 4, armorX + 4 * 30 + 2, armorY + 34, BACKGROUND);
+            EquipmentSlot[] armorSlots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST,
+                    EquipmentSlot.LEGS, EquipmentSlot.FEET};
+            for (int i = 0; i < armorSlots.length; i++) {
+                ItemStack stack = client.player.getItemBySlot(armorSlots[i]);
+                int slotX = armorX + i * 30;
+                graphics.fill(slotX, armorY, slotX + 26, armorY + 26, 0xAA202631);
+                if (!stack.isEmpty()) {
+                    graphics.renderItem(stack, slotX + 5, armorY + 2);
+                    if (stack.isDamageableItem()) {
+                        int remaining = Math.max(0, stack.getMaxDamage() - stack.getDamageValue());
+                        int barWidth = Math.max(0, 22 * remaining / stack.getMaxDamage());
+                        int barColor = remaining * 2 < stack.getMaxDamage() ? 0xFFE45B5B
+                                : remaining * 4 < stack.getMaxDamage() * 3 ? 0xFFE5B65B : 0xFF65D58A;
+                        graphics.fill(slotX + 2, armorY + 22, slotX + 24, armorY + 25, 0xFF343A45);
+                        if (barWidth > 0) graphics.fill(slotX + 2, armorY + 22,
+                                slotX + 2 + barWidth, armorY + 25, barColor);
+                    }
+                } else {
+                    graphics.text(client.font, "-", slotX + 11, armorY + 8, MUTED);
+                }
             }
-            drawLine(graphics, client, x, y, 180, armor.toString());
-            y += 24;
         }
         if (AstraModules.isEnabled("Keystrokes")) {
-            int keyY = Math.max(8, client.getWindow().getGuiScaledHeight() - 58);
+            int keyY = Math.max(8, client.getWindow().getGuiScaledHeight() - 82);
             int center = client.getWindow().getGuiScaledWidth() / 2;
             drawKey(graphics, client, center - 12, keyY, "W", client.options.keyUp.isDown());
             drawKey(graphics, client, center - 36, keyY + 23, "A", client.options.keyLeft.isDown());
             drawKey(graphics, client, center - 12, keyY + 23, "S", client.options.keyDown.isDown());
             drawKey(graphics, client, center + 12, keyY + 23, "D", client.options.keyRight.isDown());
-            drawKey(graphics, client, center - 12, keyY + 46, "J", client.options.keyJump.isDown());
+            drawKey(graphics, client, center - 12, keyY + 46, "SPACE", client.options.keyJump.isDown(), 46);
+            drawKey(graphics, client, center - 36, keyY + 69, "LMB",
+                    GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS, 34);
+            drawKey(graphics, client, center + 2, keyY + 69, "RMB",
+                    GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS, 34);
         }
 
         if (AstraModules.isEnabled("Item Counter")) {
@@ -700,9 +719,17 @@ public final class AstraHud {
         graphics.text(client.font, text, x + 7, y + 6, WHITE);
     }
 
-    private static void drawKey(GuiGraphicsExtractor graphics, Minecraft client, int x, int y, String key, boolean pressed) {
+    private static void drawKey(GuiGraphicsExtractor graphics, Minecraft client, int x, int y,
+            String key, boolean pressed) {
+        drawKey(graphics, client, x, y, key, pressed, 22);
+    }
+
+    private static void drawKey(GuiGraphicsExtractor graphics, Minecraft client, int x, int y,
+            String key, boolean pressed, int width) {
         int color = pressed ? 0xFF789BD0 : 0xCC171B22;
-        graphics.fill(x, y, x + 22, y + 20, color);
-        graphics.text(client.font, key, x + 7, y + 6, WHITE);
+        graphics.fill(x, y, x + width, y + 20, 0xFF080A0F);
+        graphics.fill(x + 1, y + 1, x + width - 1, y + 19, color);
+        int textWidth = client.font.width(key);
+        graphics.text(client.font, key, x + Math.max(2, (width - textWidth) / 2), y + 6, WHITE);
     }
 }
