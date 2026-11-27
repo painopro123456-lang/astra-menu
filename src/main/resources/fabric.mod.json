@@ -3,10 +3,9 @@
   "id": "astra_menu",
   "version": "${version}",
   "name": "Astra Menu",
-  "description": "A polished client-side Minecraft utility menu with classic, readable HUDs.",
+  "description": "A clean client-side Fabric mod shell.",
   "authors": ["Crystallmoon"],
   "environment": "client",
-  "mixins": ["astra_menu.mixins.json"],
   "entrypoints": {
     "client": ["dev.crystallmoon.astra.AstraMenuClient"]
   },
