@@ -24,6 +24,8 @@ public final class AstraHud {
     private static boolean leftWasDown;
     private static boolean rightWasDown;
     private static final Deque<Long> CLICK_TIMES = new ArrayDeque<>();
+    private static final Deque<Long> LEFT_CLICK_TIMES = new ArrayDeque<>();
+    private static final Deque<Long> RIGHT_CLICK_TIMES = new ArrayDeque<>();
     private static final int[] FPS_SAMPLES = new int[32];
     private static final int[] PING_SAMPLES = new int[32];
     private static int graphIndex;
@@ -71,11 +73,13 @@ public final class AstraHud {
         long window = GLFW.glfwGetCurrentContext();
         boolean leftDown = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
         boolean rightDown = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS;
-        if (leftDown && !leftWasDown) CLICK_TIMES.addLast(now);
-        if (rightDown && !rightWasDown) CLICK_TIMES.addLast(now);
+        if (leftDown && !leftWasDown) { CLICK_TIMES.addLast(now); LEFT_CLICK_TIMES.addLast(now); }
+        if (rightDown && !rightWasDown) { CLICK_TIMES.addLast(now); RIGHT_CLICK_TIMES.addLast(now); }
         leftWasDown = leftDown;
         rightWasDown = rightDown;
         while (!CLICK_TIMES.isEmpty() && now - CLICK_TIMES.peekFirst() > 1_000_000_000L) CLICK_TIMES.removeFirst();
+        while (!LEFT_CLICK_TIMES.isEmpty() && now - LEFT_CLICK_TIMES.peekFirst() > 1_000_000_000L) LEFT_CLICK_TIMES.removeFirst();
+        while (!RIGHT_CLICK_TIMES.isEmpty() && now - RIGHT_CLICK_TIMES.peekFirst() > 1_000_000_000L) RIGHT_CLICK_TIMES.removeFirst();
         if (now - lastGraphSample >= 250_000_000L) {
             FPS_SAMPLES[graphIndex] = client.getFps();
             var connection = client.getConnection();
@@ -452,12 +456,9 @@ public final class AstraHud {
             y += 24;
         }
         if (AstraModules.isEnabled("CPS Counter")) {
-            int leftClicks = (int) CLICK_TIMES.stream().filter(t -> t != null).count();
             drawPanel(graphics, client, x, y, 150, "CLICKS PER SECOND");
-            graphics.text(client.font, "LMB  " + (leftDown ? "●" : "○") + "   " + leftClicks,
-                    x + 7, y + 15, WHITE);
-            graphics.text(client.font, "RMB  " + (rightDown ? "●" : "○") + "   " + rightCps(now),
-                    x + 78, y + 15, WHITE);
+            graphics.text(client.font, "LMB  " + LEFT_CLICK_TIMES.size(), x + 7, y + 15, WHITE);
+            graphics.text(client.font, "RMB  " + RIGHT_CLICK_TIMES.size(), x + 78, y + 15, WHITE);
             y += 38;
         }
         if (AstraModules.isEnabled("FPS Graph")) {
@@ -733,9 +734,6 @@ public final class AstraHud {
         if (fill > 0) graphics.fill(x + 7, y + 19, x + 7 + fill, y + 25, color);
     }
 
-    private static int rightCps(long now) {
-        return rightWasDown ? 1 : 0;
-    }
 
     private static void drawGraph(GuiGraphicsExtractor graphics, int x, int y, String label, int[] samples, int width) {
         if (y < -46 || y > Minecraft.getInstance().getWindow().getGuiScaledHeight() - 46) return;
