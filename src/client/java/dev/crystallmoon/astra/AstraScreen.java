@@ -35,7 +35,7 @@ public final class AstraScreen extends Screen {
         page=Math.max(0,Math.min(page,pages-1));
         for(int i=page*PAGE_SIZE;i<Math.min(modules.size(),(page+1)*PAGE_SIZE);i++){
             String name=modules.get(i); int local=i-page*PAGE_SIZE, col=local%2, row=local/2;
-            int x=left+190+col*330, y=top+116+row*55;
+            int x=left+190+col*330, y=top+157+row*55;
             addRenderableWidget(Button.builder(Component.literal((AstraModules.isEnabled(name)?"●  ":"○  ")+name),b->{
                 AstraModules.toggle(name);
                 b.setMessage(Component.literal((AstraModules.isEnabled(name)?"●  ":"○  ")+name));
@@ -66,7 +66,6 @@ public final class AstraScreen extends Screen {
     }
 
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mouseX,int mouseY,float partialTick){
-        super.extractRenderState(g,mouseX,mouseY,partialTick);
         int l=Math.max(12,(width-900)/2), t=Math.max(12,(height-520)/2), r=Math.min(width-12,l+900), b=Math.min(height-12,t+520);
         g.fill(0,0,width,height,0xA9000000); g.fill(l,t,r,b,BG); g.fill(l,t,r,t+82,PANEL);
         g.fill(l,t+82,l+174,b,PANEL); g.fill(l,t+81,r,t+83,ACCENT); g.fill(l+173,t+82,l+175,b,0x553F526B);
@@ -74,8 +73,8 @@ public final class AstraScreen extends Screen {
         g.text(font,"A clean space for your Minecraft setup",l+22,t+48,MUTED);
         g.text(font,"RIGHT SHIFT  /  CLOSE",r-172,t+24,MUTED); g.text(font,"LIBRARY",l+22,t+97,MUTED);
         int enabled=0; for(boolean state:AstraModules.all().values())if(state)enabled++;
-        g.text(font,"MODULES",l+190,t+91,WHITE);
-        g.text(font,enabled+" ENABLED  ·  "+AstraModules.all().size()+" AVAILABLE",l+190,t+103,ACCENT);
+        g.text(font,"ASTRA MODULE LIBRARY",l+190,t+94,WHITE);
+        g.text(font,enabled+" ENABLED  ·  "+AstraModules.all().size()+" AVAILABLE",r-255,t+94,ACCENT);
         if(selectedModule!=null){
             g.fill(l+190,t+145,r-20,b-62,CARD); g.text(font,"MODULE SETTINGS",l+214,t+170,ACCENT);
             g.text(font,selectedModule,l+214,t+202,WHITE);
@@ -84,12 +83,13 @@ public final class AstraScreen extends Screen {
             g.text(font,"Additional per-module controls will appear here when supported.",l+214,t+296,MUTED);
         }else{
             List<String> modules=filteredModules(); int pages=Math.max(1,(modules.size()+PAGE_SIZE-1)/PAGE_SIZE);
-            g.text(font,category+"  /  "+modules.size()+" MODULES",l+190,t+91,WHITE);
-            g.text(font,"Select a tile to toggle it. Open the gear for module details.",l+190,t+103,MUTED);
+            g.text(font,category+"  /  "+modules.size()+" MODULES",l+190,t+119,WHITE);
+            g.text(font,"Select a tile to toggle it. Open the gear for module details.",l+190,t+137,MUTED);
             g.text(font,"PAGE "+(page+1)+" OF "+pages,l+190,b-42,MUTED);
         }
         g.text(font,"ASTRA  •  BUILT FOR YOUR CLIENT",l+22,b-24,MUTED);
         g.text(font,"CONFIG SAVES AUTOMATICALLY",r-222,b-24,MUTED);
+        super.extractRenderState(g,mouseX,mouseY,partialTick);
     }
     @Override public boolean isPauseScreen(){return false;}
 }
