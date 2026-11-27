@@ -71,7 +71,8 @@ public final class AstraHud {
         long window = GLFW.glfwGetCurrentContext();
         boolean leftDown = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
         boolean rightDown = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS;
-        if (leftDown && !leftWasDown || rightDown && !rightWasDown) CLICK_TIMES.addLast(now);
+        if (leftDown && !leftWasDown) CLICK_TIMES.addLast(now);
+        if (rightDown && !rightWasDown) CLICK_TIMES.addLast(now);
         leftWasDown = leftDown;
         rightWasDown = rightDown;
         while (!CLICK_TIMES.isEmpty() && now - CLICK_TIMES.peekFirst() > 1_000_000_000L) CLICK_TIMES.removeFirst();
@@ -134,8 +135,8 @@ public final class AstraHud {
             y += 24;
         }
         if (AstraModules.isEnabled("Speedometer")) {
-            double speed = client.player.getDeltaMovement().horizontalDistance() * 20.0;
-            drawLine(graphics, client, x, y, 145, String.format("Speed  %.2f m/s", speed));
+            double speedKmh = client.player.getDeltaMovement().horizontalDistance() * 20.0 * 3.6;
+            drawLine(graphics, client, x, y, 145, String.format("Speed  %.1f km/h", speedKmh));
             y += 24;
         }
         if (AstraModules.isEnabled("World Time")) {
@@ -282,10 +283,11 @@ public final class AstraHud {
         if (AstraModules.isEnabled("Inventory Status") || AstraModules.isEnabled("Empty Slots")
                 || AstraModules.isEnabled("Totem Counter") || AstraModules.isEnabled("Arrow Counter")
                 || AstraModules.isEnabled("Food Counter") || AstraModules.isEnabled("Potion Counter")) {
-            int empty = 0, totems = 0, arrows = 0, food = 0, potions = 0;
+            int empty = 0, occupied = 0, totems = 0, arrows = 0, food = 0, potions = 0;
             for (int i = 0; i < client.player.getInventory().getContainerSize(); i++) {
                 ItemStack stack = client.player.getInventory().getItem(i);
                 if (stack.isEmpty()) { empty++; continue; }
+                occupied++;
                 String item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
                 if (item.equals("totem_of_undying")) totems += stack.getCount();
                 if (item.contains("arrow")) arrows += stack.getCount();
@@ -302,27 +304,39 @@ public final class AstraHud {
                         || item.contains("spider_eye")) food += stack.getCount();
                 
             }
-            if (AstraModules.isEnabled("Inventory Status") || AstraModules.isEnabled("Empty Slots")) { drawLine(graphics, client, x, y, 155, "Empty slots  " + empty); y += 24; }
+            if (AstraModules.isEnabled("Inventory Status")) { drawLine(graphics, client, x, y, 170, "Inventory  " + occupied + " / " + (occupied + empty) + " slots used"); y += 24; }
+            if (AstraModules.isEnabled("Empty Slots")) { drawLine(graphics, client, x, y, 155, "Empty slots  " + empty); y += 24; }
             if (AstraModules.isEnabled("Totem Counter")) { drawLine(graphics, client, x, y, 125, "Totems  " + totems); y += 24; }
             if (AstraModules.isEnabled("Arrow Counter")) { drawLine(graphics, client, x, y, 125, "Arrows  " + arrows); y += 24; }
             if (AstraModules.isEnabled("Food Counter")) { drawLine(graphics, client, x, y, 125, "Food items  " + food); y += 24; }
             if (AstraModules.isEnabled("Potion Counter")) { drawLine(graphics, client, x, y, 125, "Potions  " + potions); y += 24; }
         }
-        if (AstraModules.isEnabled("Status Effects") || AstraModules.isEnabled("Potion Timers")
-                || AstraModules.isEnabled("Effect Icons") || AstraModules.isEnabled("Effect Duration")) {
+        if (AstraModules.isEnabled("Status Effects") || AstraModules.isEnabled("Potion Timers")) {
             var effects = client.player.getActiveEffects();
-            drawLine(graphics, client, x, y, 155, "Active effects  " + effects.size());
-            y += 24;
-            if (AstraModules.isEnabled("Potion Timers") || AstraModules.isEnabled("Effect Duration")
-                    || AstraModules.isEnabled("Effect Icons") || AstraModules.isEnabled("Status Effects")) {
+            if (AstraModules.isEnabled("Status Effects")) {
+                StringBuilder names = new StringBuilder("Effects  ");
+                if (effects.isEmpty()) names.append("None");
                 for (var effect : effects) {
-                    String name = effect.getEffect().value().getDisplayName().getString();
-                    int seconds = Math.max(0, effect.getDuration() / 20);
-                    String duration = String.format("%d:%02d", seconds / 60, seconds % 60);
-                    String level = effect.getAmplifier() > 0 ? " " + (effect.getAmplifier() + 1) : "";
-                    drawLine(graphics, client, x, y, 210, name + level + "  " + duration);
+                    if (names.length() > 8) names.append(", ");
+                    names.append(effect.getEffect().value().getDisplayName().getString());
+                    if (effect.getAmplifier() > 0) names.append(" ").append(effect.getAmplifier() + 1);
+                }
+                drawLine(graphics, client, x, y, 240, names.toString());
+                y += 24;
+            }
+            if (AstraModules.isEnabled("Potion Timers")) {
+                if (effects.isEmpty()) {
+                    drawLine(graphics, client, x, y, 180, "Potion timers  None");
                     y += 24;
-                    if (y > client.getWindow().getGuiScaledHeight() - 28) break;
+                } else {
+                    for (var effect : effects) {
+                        String name = effect.getEffect().value().getDisplayName().getString();
+                        int seconds = Math.max(0, effect.getDuration() / 20);
+                        String duration = String.format("%d:%02d", seconds / 60, seconds % 60);
+                        drawLine(graphics, client, x, y, 210, name + "  " + duration);
+                        y += 24;
+                        if (y > client.getWindow().getGuiScaledHeight() - 28) break;
+                    }
                 }
             }
         }
@@ -663,6 +677,7 @@ public final class AstraHud {
     }
 
     private static void drawGraph(GuiGraphicsExtractor graphics, int x, int y, String label, int[] samples, int width) {
+        if (y < -46 || y > Minecraft.getInstance().getWindow().getGuiScaledHeight() - 46) return;
         graphics.fill(x, y, x + width, y + 46, BACKGROUND);
         graphics.text(Minecraft.getInstance().font, label, x + 5, y + 4, WHITE);
         int max = 1;
@@ -677,6 +692,7 @@ public final class AstraHud {
     }
 
     private static void drawLine(GuiGraphicsExtractor graphics, Minecraft client, int x, int y, int width, String text) {
+        if (y < -20 || y > client.getWindow().getGuiScaledHeight() - 20) return;
         graphics.fill(x, y, x + width, y + 20, BACKGROUND);
         graphics.fill(x, y, x + 2, y + 20, ACCENT);
         graphics.text(client.font, text, x + 7, y + 6, WHITE);
