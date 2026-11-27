@@ -341,7 +341,7 @@ public final class AstraHud {
             if (AstraModules.isEnabled("Food Counter")) { drawLine(graphics, client, x, y, 125, "Food items  " + food); y += 24; }
             if (AstraModules.isEnabled("Potion Counter")) { drawLine(graphics, client, x, y, 125, "Potions  " + potions); y += 24; }
         }
-        if (AstraModules.isEnabled("Status Effects") || AstraModules.isEnabled("Potion Timers")) {
+        if (AstraModules.isEnabled("Status Effects") || AstraModules.isEnabled("Potion Timers") || AstraModules.isEnabled("Effect Icons")) {
             var effects = client.player.getActiveEffects();
             if (AstraModules.isEnabled("Status Effects")) {
                 StringBuilder names = new StringBuilder("Effects  ");
@@ -355,6 +355,27 @@ public final class AstraHud {
                 }
                 drawLine(graphics, client, x, y, 240, names.toString());
                 y += 24;
+            }
+            if (AstraModules.isEnabled("Effect Icons")) {
+                if (effects.isEmpty()) {
+                    drawLine(graphics, client, x, y, 180, "Effect icons  None");
+                    y += 24;
+                } else {
+                    for (var effect : effects) {
+                        String effectName = effect.getEffect().value().getDisplayName().getString();
+                        String iconText = effectName.isEmpty() ? "?" : effectName.substring(0, 1).toUpperCase(java.util.Locale.ROOT);
+                        int amplifier = effect.getAmplifier() + 1;
+                        int seconds = Math.max(0, effect.getDuration() / 20);
+                        int iconColor = effect.getEffect().value().isBeneficial() ? 0xFF477F62 : 0xFF8A5360;
+                        graphics.fill(x, y, x + 20, y + 20, iconColor);
+                        graphics.text(client.font, iconText, x + 7, y + 6, WHITE);
+                        drawLine(graphics, client, x + 24, y, 190,
+                                effectName + (amplifier > 1 ? " " + amplifier : "") +
+                                "  " + String.format("%d:%02d", seconds / 60, seconds % 60));
+                        y += 24;
+                        if (y > client.getWindow().getGuiScaledHeight() - 28) break;
+                    }
+                }
             }
             if (AstraModules.isEnabled("Potion Timers")) {
                 if (effects.isEmpty()) {
