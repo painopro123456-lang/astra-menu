@@ -315,9 +315,11 @@ public final class AstraHud {
             var effects = client.player.getActiveEffects();
             if (AstraModules.isEnabled("Status Effects")) {
                 StringBuilder names = new StringBuilder("Effects  ");
+                boolean firstEffect = true;
                 if (effects.isEmpty()) names.append("None");
                 for (var effect : effects) {
-                    if (names.length() > 8) names.append(", ");
+                    if (!firstEffect) names.append(", ");
+                    firstEffect = false;
                     names.append(effect.getEffect().value().getDisplayName().getString());
                     if (effect.getAmplifier() > 0) names.append(" ").append(effect.getAmplifier() + 1);
                 }
