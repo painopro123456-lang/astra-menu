@@ -699,6 +699,173 @@ public final class AstraHud {
                 }
             }
         }
+
+        if (AstraModules.isEnabled("Attack Cooldown")) {
+            drawMeter(graphics, client, x, y, 150, "ATTACK COOLDOWN",
+                    client.player.getAttackStrengthScale(0.0f) * 100.0, 100.0, ACCENT);
+            y += 34;
+        }
+        if (AstraModules.isEnabled("Armor Points")) {
+            drawMetric(graphics, client, x, y, 150, "ARMOR",
+                    Integer.toString(client.player.getArmorValue()), client.player.getArmorValue(), 20.0, ACCENT);
+            y += 34;
+        }
+        if (AstraModules.isEnabled("Held Item Name") || AstraModules.isEnabled("Held Item Count")) {
+            ItemStack heldStack = client.player.getMainHandItem();
+            String heldName = heldStack.isEmpty() ? "Empty hand" : heldStack.getHoverName().getString();
+            if (AstraModules.isEnabled("Held Item Name")) {
+                drawLine(graphics, client, x, y, 210, "Held item  " + heldName);
+                y += 24;
+            }
+            if (AstraModules.isEnabled("Held Item Count")) {
+                drawLine(graphics, client, x, y, 150, "Held count  " + (heldStack.isEmpty() ? 0 : heldStack.getCount()));
+                y += 24;
+            }
+        }
+        if (AstraModules.isEnabled("Offhand Item Name") || AstraModules.isEnabled("Offhand Item Count")) {
+            ItemStack offhandStack = client.player.getOffhandItem();
+            String offhandName = offhandStack.isEmpty() ? "Empty" : offhandStack.getHoverName().getString();
+            if (AstraModules.isEnabled("Offhand Item Name")) {
+                drawLine(graphics, client, x, y, 210, "Offhand  " + offhandName);
+                y += 24;
+            }
+            if (AstraModules.isEnabled("Offhand Item Count")) {
+                drawLine(graphics, client, x, y, 150, "Offhand count  " + (offhandStack.isEmpty() ? 0 : offhandStack.getCount()));
+                y += 24;
+            }
+        }
+        if (AstraModules.isEnabled("Selected Hotbar Slot")) {
+            drawMetric(graphics, client, x, y, 150, "SELECTED SLOT",
+                    Integer.toString(client.player.getInventory().selected + 1),
+                    client.player.getInventory().selected + 1, 9.0, ACCENT);
+            y += 34;
+        }
+        if (AstraModules.isEnabled("Inventory Used Slots") || AstraModules.isEnabled("Inventory Fill Percentage")) {
+            int usedSlots = 0;
+            int totalSlots = client.player.getInventory().items.size();
+            for (ItemStack stack : client.player.getInventory().items) if (!stack.isEmpty()) usedSlots++;
+            if (AstraModules.isEnabled("Inventory Used Slots")) {
+                drawLine(graphics, client, x, y, 160, "Used slots  " + usedSlots + " / " + totalSlots);
+                y += 24;
+            }
+            if (AstraModules.isEnabled("Inventory Fill Percentage")) {
+                drawMeter(graphics, client, x, y, 160, "INVENTORY",
+                        usedSlots * 100.0 / Math.max(1, totalSlots), 100.0, ACCENT);
+                y += 34;
+            }
+        }
+        if (AstraModules.isEnabled("Ender Pearl Counter") || AstraModules.isEnabled("Golden Apple Counter")) {
+            int pearls = 0;
+            int goldenApples = 0;
+            for (ItemStack stack : client.player.getInventory().items) {
+                if (stack.is(net.minecraft.world.item.Items.ENDER_PEARL)) pearls += stack.getCount();
+                if (stack.is(net.minecraft.world.item.Items.GOLDEN_APPLE)
+                        || stack.is(net.minecraft.world.item.Items.ENCHANTED_GOLDEN_APPLE)) goldenApples += stack.getCount();
+            }
+            if (AstraModules.isEnabled("Ender Pearl Counter")) {
+                drawLine(graphics, client, x, y, 150, "Ender pearls  " + pearls);
+                y += 24;
+            }
+            if (AstraModules.isEnabled("Golden Apple Counter")) {
+                drawLine(graphics, client, x, y, 150, "Golden apples  " + goldenApples);
+                y += 24;
+            }
+        }
+        if (AstraModules.isEnabled("Chunk Section")) {
+            drawLine(graphics, client, x, y, 150, "Chunk section  " + (client.player.blockPosition().getY() >> 4));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Region Coordinates")) {
+            var regionPos = client.player.blockPosition();
+            drawLine(graphics, client, x, y, 170, "Region  " + (regionPos.getX() >> 9) + ", " + (regionPos.getZ() >> 9));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Target Distance") || AstraModules.isEnabled("Target Coordinates")) {
+            if (client.hitResult instanceof net.minecraft.world.phys.EntityHitResult targetHit) {
+                var targetEntity = targetHit.getEntity();
+                if (AstraModules.isEnabled("Target Distance")) {
+                    drawLine(graphics, client, x, y, 150, String.format("Target distance  %.1f m",
+                            targetEntity.distanceTo(client.player)));
+                    y += 24;
+                }
+                if (AstraModules.isEnabled("Target Coordinates")) {
+                    drawLine(graphics, client, x, y, 190, "Target XYZ  " + targetEntity.blockPosition().toShortString());
+                    y += 24;
+                }
+            } else if (client.hitResult instanceof net.minecraft.world.phys.BlockHitResult targetBlock) {
+                if (AstraModules.isEnabled("Target Coordinates")) {
+                    drawLine(graphics, client, x, y, 190, "Target XYZ  " + targetBlock.getBlockPos().toShortString());
+                    y += 24;
+                }
+            }
+        }
+        if (AstraModules.isEnabled("Player Height")) {
+            drawMetric(graphics, client, x, y, 150, "ALTITUDE",
+                    Integer.toString(client.player.getBlockY()), client.player.getBlockY(), 320.0, ACCENT);
+            y += 34;
+        }
+        if (AstraModules.isEnabled("Player Name")) {
+            drawLine(graphics, client, x, y, 180, "Player  " + client.player.getName().getString());
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Main Hand Durability")) {
+            ItemStack mainHand = client.player.getMainHandItem();
+            String remaining = mainHand.isEmpty() || !mainHand.isDamageableItem() ? "N/A"
+                    : Integer.toString(mainHand.getMaxDamage() - mainHand.getDamageValue());
+            drawLine(graphics, client, x, y, 170, "Main hand durability  " + remaining);
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Offhand Durability")) {
+            ItemStack offhand = client.player.getOffhandItem();
+            String remaining = offhand.isEmpty() || !offhand.isDamageableItem() ? "N/A"
+                    : Integer.toString(offhand.getMaxDamage() - offhand.getDamageValue());
+            drawLine(graphics, client, x, y, 170, "Offhand durability  " + remaining);
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Total Armor Durability")) {
+            int remaining = 0;
+            int maximum = 0;
+            for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST,
+                    EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+                ItemStack armorPiece = client.player.getItemBySlot(slot);
+                if (armorPiece.isDamageableItem()) {
+                    remaining += armorPiece.getMaxDamage() - armorPiece.getDamageValue();
+                    maximum += armorPiece.getMaxDamage();
+                }
+            }
+            drawMeter(graphics, client, x, y, 160, "ARMOR DURABILITY", remaining,
+                    Math.max(1, maximum), 0xFF65D58A);
+            y += 34;
+        }
+        if (AstraModules.isEnabled("Player Food Level")) {
+            drawMeter(graphics, client, x, y, 150, "FOOD LEVEL",
+                    client.player.getFoodData().getFoodLevel(), 20.0, 0xFFE8B64F);
+            y += 34;
+        }
+        if (AstraModules.isEnabled("Player Air Supply")) {
+            drawMeter(graphics, client, x, y, 150, "AIR SUPPLY",
+                    client.player.getAirSupply(), client.player.getMaxAirSupply(), ACCENT);
+            y += 34;
+        }
+        if (AstraModules.isEnabled("Player Experience Level")) {
+            drawMetric(graphics, client, x, y, 150, "XP LEVEL",
+                    Integer.toString(client.player.experienceLevel), client.player.experienceLevel, 100.0, 0xFF70D77C);
+            y += 34;
+        }
+        if (AstraModules.isEnabled("Player Rotation")) {
+            drawLine(graphics, client, x, y, 170, String.format("Rotation  %.1f / %.1f",
+                    client.player.getYRot(), client.player.getXRot()));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Player Ground Status")) {
+            drawLine(graphics, client, x, y, 150, "Grounded  " + (client.player.onGround() ? "Yes" : "No"));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Player Sneaking Status")) {
+            drawLine(graphics, client, x, y, 150, "Sneaking  " + (client.player.isShiftKeyDown() ? "Yes" : "No"));
+            y += 24;
+        }
+
         if (AstraModules.isEnabled("Chunk Updates")) {
             drawLine(graphics, client, x, y, 175, "Chunk updates  " + chunkUpdates);
             y += 24;
