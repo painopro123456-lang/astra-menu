@@ -186,7 +186,9 @@ public final class AstraHud {
                 int slotX = armorX + i * 30;
                 graphics.fill(slotX, armorY, slotX + 26, armorY + 26, 0xAA202631);
                 if (!stack.isEmpty()) {
-                    graphics.renderItem(stack, slotX + 5, armorY + 2);
+                    String armorName = stack.getHoverName().getString();
+                    String shortName = armorName.length() > 3 ? armorName.substring(0, 3) : armorName;
+                    graphics.text(client.font, shortName, slotX + 3, armorY + 8, WHITE);
                     if (stack.isDamageableItem()) {
                         int remaining = Math.max(0, stack.getMaxDamage() - stack.getDamageValue());
                         int barWidth = Math.max(0, 22 * remaining / stack.getMaxDamage());
@@ -197,7 +199,7 @@ public final class AstraHud {
                                 slotX + 2 + barWidth, armorY + 25, barColor);
                     }
                 } else {
-                    graphics.text(client.font, "-", slotX + 11, armorY + 8, MUTED);
+                    graphics.text(client.font, "-", slotX + 11, armorY + 8, 0xFF8A93A3);
                 }
             }
         }
