@@ -68,6 +68,86 @@ public final class AstraModules {
         add("Crosshair", false); // Visual
         add("Effect Icons", false); // Visual
         add("Target HUD", false); // Visual
+        add("Saturation HUD", false); // HUD / utility
+        add("Fall Distance", false); // HUD / utility
+        add("Block Coordinates", false); // HUD / utility
+        add("Chunk Coordinates", false); // HUD / utility
+        add("Yaw Pitch", false); // HUD / utility
+        add("Absorption", false); // HUD / utility
+        add("Air HUD", false); // HUD / utility
+        add("Memory Usage", false); // HUD / utility
+        add("Java Version", false); // HUD / utility
+        add("World Age", false); // HUD / utility
+        add("Real Time", false); // HUD / utility
+        add("Facing", false); // HUD / utility
+        add("Compass", false); // HUD / utility
+        add("Held Item", false); // HUD / utility
+        add("Offhand Item", false); // HUD / utility
+        add("Rain Status", false); // HUD / utility
+        add("Client Version", false); // HUD / utility
+        add("Food Counter", false); // HUD / utility
+        add("Horizontal Speed", false); // HUD / utility
+        add("Vertical Speed", false); // HUD / utility
+        add("Horse Speed", false); // HUD / utility
+        add("Boat Speed", false); // HUD / utility
+        add("Mount Health", false); // HUD / utility
+        add("Health Bar", false); // HUD / utility
+        add("Network Status", false); // HUD / utility
+        add("Dimension ID", false); // HUD / utility
+        add("Time Played", false); // HUD / utility
+        add("Session Timer", false); // HUD / utility
+        add("FPS Graph", false); // HUD / utility
+        add("Ping Graph", false); // HUD / utility
+        add("Last Damage", false); // HUD / utility
+        add("Combat Timer", false); // HUD / utility
+        add("Boss Bar", false); // HUD / utility
+        add("Server TPS", false); // HUD / utility
+        add("Packet Rate", false); // HUD / utility
+        add("Server Address", false); // HUD / utility
+        add("Server Brand", false); // HUD / utility
+        add("Nearby Players", false); // HUD / utility
+        add("Entity Counter", false); // HUD / utility
+        add("Mob Counter", false); // HUD / utility
+        add("Nearby Entities", false); // HUD / utility
+        add("Dropped Items", false); // HUD / utility
+        add("Projectile Counter", false); // HUD / utility
+        add("Target Block", false); // HUD / utility
+        add("Looking At", false); // HUD / utility
+        add("Tool Durability", false); // HUD / utility
+        add("Player Counter", false); // HUD / utility
+        add("Coordinates HUD", false); // HUD / utility
+        add("Block Resistance", false); // HUD / utility
+        add("Harvest Level", false); // HUD / utility
+        add("Light Overlay", false); // HUD / utility
+        add("Breaking Progress", false); // HUD / utility
+        add("Arrow Trajectory", false); // HUD / utility
+        add("Chunk Updates", false); // HUD / utility
+        add("Attack Cooldown", false); // HUD / utility
+        add("Armor Points", false); // HUD / utility
+        add("Held Item Name", false); // HUD / utility
+        add("Held Item Count", false); // HUD / utility
+        add("Offhand Item Name", false); // HUD / utility
+        add("Offhand Item Count", false); // HUD / utility
+        add("Selected Hotbar Slot", false); // HUD / utility
+        add("Inventory Used Slots", false); // HUD / utility
+        add("Inventory Fill Percentage", false); // HUD / utility
+        add("Ender Pearl Counter", false); // HUD / utility
+        add("Golden Apple Counter", false); // HUD / utility
+        add("Chunk Section", false); // HUD / utility
+        add("Region Coordinates", false); // HUD / utility
+        add("Target Distance", false); // HUD / utility
+        add("Target Coordinates", false); // HUD / utility
+        add("Player Height", false); // HUD / utility
+        add("Player Name", false); // HUD / utility
+        add("Main Hand Durability", false); // HUD / utility
+        add("Offhand Durability", false); // HUD / utility
+        add("Total Armor Durability", false); // HUD / utility
+        add("Player Food Level", false); // HUD / utility
+        add("Player Air Supply", false); // HUD / utility
+        add("Player Experience Level", false); // HUD / utility
+        add("Player Rotation", false); // HUD / utility
+        add("Player Ground Status", false); // HUD / utility
+        add("Player Sneaking Status", false); // HUD / utility
     }
 
     private AstraModules() {}
