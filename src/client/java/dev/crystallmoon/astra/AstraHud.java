@@ -88,13 +88,14 @@ public final class AstraHud {
         int x = 8;
         int y = 8;
         if (AstraModules.isEnabled("Coordinates")) {
-            drawLine(graphics, client, x, y, 170, String.format("XYZ  %.1f  %.1f  %.1f",
-                    client.player.getX(), client.player.getY(), client.player.getZ()));
-            y += 24;
+            drawPanel(graphics, client, x, y, 190, "POSITION");
+            graphics.text(client.font, String.format("X %.1f   Y %.1f   Z %.1f",
+                    client.player.getX(), client.player.getY(), client.player.getZ()), x + 7, y + 15, WHITE);
+            y += 38;
         }
         if (AstraModules.isEnabled("FPS Counter")) {
-            drawLine(graphics, client, x, y, 100, "FPS  " + client.getFps());
-            y += 24;
+            drawMetric(graphics, client, x, y, 112, "FPS", Integer.toString(client.getFps()), client.getFps(), 240, ACCENT);
+            y += 34;
         }
         if (AstraModules.isEnabled("Direction")) {
             float yaw = client.player.getYRot();
@@ -116,13 +117,14 @@ public final class AstraHud {
             y += 24;
         }
         if (AstraModules.isEnabled("Health HUD")) {
-            drawLine(graphics, client, x, y, 145, String.format("Health  %.1f / %.0f",
-                    client.player.getHealth(), client.player.getMaxHealth()));
-            y += 24;
+            drawMeter(graphics, client, x, y, 150, "HEALTH", client.player.getHealth(),
+                    client.player.getMaxHealth(), 0xFFE45B68);
+            y += 34;
         }
         if (AstraModules.isEnabled("Hunger HUD")) {
-            drawLine(graphics, client, x, y, 115, "Food  " + client.player.getFoodData().getFoodLevel() + " / 20");
-            y += 24;
+            drawMeter(graphics, client, x, y, 150, "HUNGER",
+                    client.player.getFoodData().getFoodLevel(), 20.0, 0xFFE8B64F);
+            y += 34;
         }
         if (AstraModules.isEnabled("Saturation HUD")) {
             drawLine(graphics, client, x, y, 145, String.format("Saturation  %.1f",
@@ -130,14 +132,17 @@ public final class AstraHud {
             y += 24;
         }
         if (AstraModules.isEnabled("Experience HUD")) {
-            drawLine(graphics, client, x, y, 135, "XP  " + client.player.experienceLevel
-                    + "  (" + Math.round(client.player.experienceProgress * 100) + "%)");
-            y += 24;
+            drawPanel(graphics, client, x, y, 150, "EXPERIENCE  •  LVL " + client.player.experienceLevel);
+            graphics.fill(x + 7, y + 17, x + 143, y + 24, 0xFF343A45);
+            graphics.fill(x + 7, y + 17, x + 7 + Math.round(136 * client.player.experienceProgress),
+                    y + 24, 0xFF70D77C);
+            y += 34;
         }
         if (AstraModules.isEnabled("Speedometer")) {
             double speedKmh = client.player.getDeltaMovement().horizontalDistance() * 20.0 * 3.6;
-            drawLine(graphics, client, x, y, 145, String.format("Speed  %.1f km/h", speedKmh));
-            y += 24;
+            drawMetric(graphics, client, x, y, 150, "SPEED", String.format("%.1f km/h", speedKmh),
+                    speedKmh, 45.0, ACCENT);
+            y += 34;
         }
         if (AstraModules.isEnabled("World Time")) {
             long ticks = Math.floorMod(client.level.getLevelData().getGameTime(), 24000L);
@@ -447,8 +452,13 @@ public final class AstraHud {
             y += 24;
         }
         if (AstraModules.isEnabled("CPS Counter")) {
-            drawLine(graphics, client, x, y, 120, "CPS  " + CLICK_TIMES.size());
-            y += 24;
+            int leftClicks = (int) CLICK_TIMES.stream().filter(t -> t != null).count();
+            drawPanel(graphics, client, x, y, 150, "CLICKS PER SECOND");
+            graphics.text(client.font, "LMB  " + (leftDown ? "●" : "○") + "   " + leftClicks,
+                    x + 7, y + 15, WHITE);
+            graphics.text(client.font, "RMB  " + (rightDown ? "●" : "○") + "   " + rightCps(now),
+                    x + 78, y + 15, WHITE);
+            y += 38;
         }
         if (AstraModules.isEnabled("FPS Graph")) {
             drawGraph(graphics, x, y, "FPS", FPS_SAMPLES, 240);
@@ -695,6 +705,36 @@ public final class AstraHud {
             drawLine(graphics, client, x, y, 165, "Spawn light  " + light + (light < 8 ? "  (hostile spawn risk)" : ""));
             y += 24;
         }
+    }
+
+
+    private static void drawPanel(GuiGraphicsExtractor graphics, Minecraft client, int x, int y,
+            int width, String title) {
+        if (y < -28 || y > client.getWindow().getGuiScaledHeight() - 30) return;
+        graphics.fill(x, y, x + width, y + 30, 0xD90B0E14);
+        graphics.fill(x, y, x + 2, y + 30, ACCENT);
+        graphics.text(client.font, title, x + 7, y + 5, 0xFFB8C7DF);
+    }
+
+    private static void drawMetric(GuiGraphicsExtractor graphics, Minecraft client, int x, int y,
+            int width, String title, String value, double amount, double max, int color) {
+        drawPanel(graphics, client, x, y, width, title);
+        graphics.text(client.font, value, x + 7, y + 15, WHITE);
+        graphics.fill(x + width - 7, y + 17, x + width - 4, y + 25, 0xFF343A45);
+        int h = (int)Math.round(8.0 * Math.max(0.0, Math.min(1.0, amount / Math.max(1.0, max))));
+        if (h > 0) graphics.fill(x + width - 7, y + 25 - h, x + width - 4, y + 25, color);
+    }
+
+    private static void drawMeter(GuiGraphicsExtractor graphics, Minecraft client, int x, int y,
+            int width, String title, double value, double max, int color) {
+        drawPanel(graphics, client, x, y, width, title + "  " + String.format("%.1f / %.0f", value, max));
+        graphics.fill(x + 7, y + 19, x + width - 7, y + 25, 0xFF343A45);
+        int fill = (int)Math.round((width - 14) * Math.max(0.0, Math.min(1.0, value / Math.max(1.0, max))));
+        if (fill > 0) graphics.fill(x + 7, y + 19, x + 7 + fill, y + 25, color);
+    }
+
+    private static int rightCps(long now) {
+        return rightWasDown ? 1 : 0;
     }
 
     private static void drawGraph(GuiGraphicsExtractor graphics, int x, int y, String label, int[] samples, int width) {
