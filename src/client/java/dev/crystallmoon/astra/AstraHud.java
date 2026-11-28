@@ -870,7 +870,7 @@ public final class AstraHud {
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
-        if (AstraModules.isEnabled("Crosshair")) {
+        if (AstraModules.isEnabled("Crosshair") && client.options.getCameraType().isFirstPerson()) {
             int cx = client.getWindow().getGuiScaledWidth() / 2;
             int cy = client.getWindow().getGuiScaledHeight() / 2;
             graphics.fill(cx - 7, cy, cx - 3, cy + 1, WHITE);
