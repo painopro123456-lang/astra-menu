@@ -136,18 +136,8 @@ public final class AstraHud {
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Direction")) {
-            float yaw = client.player.getYRot();
-            String direction = switch (Math.floorMod(Math.round(yaw / 45.0f), 8)) {
-                case 0 -> "South";
-                case 1 -> "South-West";
-                case 2 -> "West";
-                case 3 -> "North-West";
-                case 4 -> "North";
-                case 5 -> "North-East";
-                case 6 -> "East";
-                default -> "South-East";
-            };
-            drawLine(graphics, client, x, y, 130, "Facing  " + direction);
+            int heading = Math.floorMod(Math.round(client.player.getYRot() + 180.0f), 360);
+            drawLine(graphics, client, x, y, 145, "Heading  " + heading + "°");
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
@@ -423,7 +413,7 @@ public final class AstraHud {
                         || item.contains("spider_eye")) food += stack.getCount();
                 
             }
-            if (AstraModules.isEnabled("Inventory Status")) { drawLine(graphics, client, x, y, 170, "Inventory  " + occupied + " / " + (occupied + empty) + " slots used"); y += 24;
+            if (AstraModules.isEnabled("Inventory Status")) { drawLine(graphics, client, x, y, 210, "Inventory  " + occupied + " used, " + empty + " empty"); y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; } }
             if (AstraModules.isEnabled("Empty Slots")) { drawLine(graphics, client, x, y, 155, "Empty slots  " + empty); y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; } }
@@ -761,18 +751,25 @@ public final class AstraHud {
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
-        if (AstraModules.isEnabled("Durability") || AstraModules.isEnabled("Tool Durability")) {
+        if (AstraModules.isEnabled("Durability")) {
             ItemStack tool = client.player.getMainHandItem();
             if (!tool.isEmpty() && tool.isDamageableItem()) {
-                drawLine(graphics, client, x, y, 180, "Tool durability  "
-                        + Math.max(0, tool.getMaxDamage() - tool.getDamageValue()) + " / " + tool.getMaxDamage());
-                y += 24;
-            if (y + 46 > layoutBottom) { y = 8; x += 250; }
+                int remaining = Math.max(0, tool.getMaxDamage() - tool.getDamageValue());
+                drawMeter(graphics, client, x, y, 180, "HELD ITEM DURABILITY", remaining,
+                        tool.getMaxDamage(), 0xFF65D58A);
             } else {
-                drawLine(graphics, client, x, y, 150, "Tool durability  N/A");
-                y += 24;
-            if (y + 46 > layoutBottom) { y = 8; x += 250; }
+                drawLine(graphics, client, x, y, 180, "Held item durability  N/A");
             }
+            y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
+        }
+        if (AstraModules.isEnabled("Tool Durability")) {
+            ItemStack tool = client.player.getMainHandItem();
+            String value = tool.isEmpty() || !tool.isDamageableItem() ? "N/A"
+                    : Math.max(0, tool.getMaxDamage() - tool.getDamageValue()) + " / " + tool.getMaxDamage();
+            drawLine(graphics, client, x, y, 180, "Tool durability  " + value);
+            y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Armor Durability")) {
             for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST,
@@ -1122,9 +1119,9 @@ public final class AstraHud {
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Player Food Level")) {
-            drawMeter(graphics, client, x, y, 150, "FOOD LEVEL",
-                    client.player.getFoodData().getFoodLevel(), 20.0, 0xFFE8B64F);
-            y += 34;
+            drawLine(graphics, client, x, y, 150, "Food level  "
+                    + client.player.getFoodData().getFoodLevel() + " / 20");
+            y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Player Air Supply")) {
