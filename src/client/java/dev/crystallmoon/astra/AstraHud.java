@@ -6,8 +6,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.UUID;
 
-import org.lwjgl.glfw.GLFW;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -86,10 +84,9 @@ public final class AstraHud {
             lastDamageNanos = now;
         }
         previousHealth = currentHealth;
-        long window = GLFW.glfwGetCurrentContext();
         boolean inGameInput = client.gui.screen() == null;
-        boolean leftDown = inGameInput && GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
-        boolean rightDown = inGameInput && GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS;
+        boolean leftDown = inGameInput && client.mouseHandler.isLeftPressed();
+        boolean rightDown = inGameInput && client.mouseHandler.isRightPressed();
         if (leftDown && !leftWasDown) LEFT_CLICK_TIMES.addLast(now);
         if (rightDown && !rightWasDown) RIGHT_CLICK_TIMES.addLast(now);
         leftWasDown = leftDown;
@@ -254,9 +251,9 @@ public final class AstraHud {
             drawKey(graphics, client, center + 12, keyY + 23, "D", client.options.keyRight.isDown());
             drawKey(graphics, client, center - 12, keyY + 46, "SPACE", client.options.keyJump.isDown(), 46);
             drawKey(graphics, client, center - 36, keyY + 69, "LMB",
-                    inGameInput && GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS, 34);
+                    inGameInput && client.mouseHandler.isLeftPressed(), 34);
             drawKey(graphics, client, center + 2, keyY + 69, "RMB",
-                    inGameInput && GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS, 34);
+                    inGameInput && client.mouseHandler.isRightPressed(), 34);
         }
 
         if (AstraModules.isEnabled("Item Counter")) {
