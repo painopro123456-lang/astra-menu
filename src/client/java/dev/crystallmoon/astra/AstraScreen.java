@@ -92,7 +92,9 @@ public final class AstraScreen extends Screen {
         if (List.of("Item Counter", "Inventory Status", "Empty Slots", "Totem Counter",
                 "Arrow Counter", "Potion Counter", "Durability", "Armor Durability",
                 "Hotbar").contains(name)) return "Items";
-        if (List.of("Crosshair", "Effect Icons", "Target HUD").contains(name)) return "Visual";
+        if (List.of("Crosshair", "Effect Icons", "Target HUD", "Target Health", "Target Max Health",
+                "Target Armor", "Target Absorption", "Target Name", "Target Type", "Target Entity ID",
+                "Target Held Item").contains(name)) return "Visual";
         return "All";
     }
 
@@ -130,7 +132,7 @@ public final class AstraScreen extends Screen {
                 left + 190, top + 137, MUTED);
         graphics.text(font, "PAGE " + (page + 1) + " OF " + pages, left + 190, bottom - 42, MUTED);
         graphics.text(font, "ASTRA  •  BUILT FOR YOUR CLIENT", left + 22, bottom - 24, MUTED);
-        graphics.text(font, "45 IMPLEMENTED MODULES", right - 222, bottom - 24, MUTED);
+        graphics.text(font, AstraModules.all().size() + " MODULES REGISTERED", right - 222, bottom - 24, MUTED);
 
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
