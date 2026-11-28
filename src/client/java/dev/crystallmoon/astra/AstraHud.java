@@ -515,7 +515,7 @@ public final class AstraHud {
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Difficulty")) {
-            drawLine(graphics, client, x, y, 145, "Difficulty  " + client.level.getDifficulty());
+            drawLine(graphics, client, x, y, 145, "Difficulty  " + client.level.getDifficulty().getDisplayName().getString());
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
