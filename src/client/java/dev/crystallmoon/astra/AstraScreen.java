@@ -37,10 +37,12 @@ public final class AstraScreen extends Screen {
     private int contentLeft() { return panelLeft() + sidebarWidth() + 16; }
     private int contentWidth() { return Math.max(1, panelLeft() + panelWidth() - contentLeft() - 16); }
     private int columns() { return contentWidth() >= 610 ? 2 : 1; }
+    private boolean compactLayout() { return panelHeight() < 360; }
+    private int gridTop() { return panelTop() + (compactLayout() ? 132 : 158); }
     private int rowsPerPage() {
-        int gridTop = panelTop() + 158;
-        int gridBottom = panelTop() + panelHeight() - 62;
-        return Math.max(1, (gridBottom - gridTop + 8) / ROW_STEP);
+        int gridBottom = panelTop() + panelHeight() - 56;
+        int usable = gridBottom - gridTop() - BUTTON_HEIGHT;
+        return Math.max(1, 1 + Math.max(0, usable) / ROW_STEP);
     }
     private int pageSize() { return rowsPerPage() * columns(); }
 
@@ -81,7 +83,7 @@ public final class AstraScreen extends Screen {
             int col = local % colCount;
             int row = local / colCount;
             int x = contentX + col * (buttonWidth + colGap);
-            int y = top + 158 + row * ROW_STEP;
+            int y = gridTop() + row * ROW_STEP;
             boolean enabled = AstraModules.isEnabled(name);
 
             addRenderableWidget(Button.builder(
@@ -92,7 +94,7 @@ public final class AstraScreen extends Screen {
                     }).bounds(x, y, buttonWidth, BUTTON_HEIGHT).build());
         }
 
-        int navY = top + panelHeight() - 46;
+        int navY = top + panelHeight() - 38;
         addRenderableWidget(Button.builder(Component.literal("‹"), button -> {
             page = Math.max(0, page - 1);
             init();
@@ -187,8 +189,10 @@ public final class AstraScreen extends Screen {
         int pages = Math.max(1, (modules.size() + pageSize() - 1) / pageSize());
         graphics.text(font, category + "  /  " + modules.size() + " MODULES",
                 contentLeft(), top + 116, WHITE);
-        graphics.text(font, "Select a module to toggle it. Your choices save automatically.",
-                contentLeft(), top + 136, MUTED);
+        if (!compactLayout()) {
+            graphics.text(font, "Select a module to toggle it. Your choices save automatically.",
+                    contentLeft(), top + 136, MUTED);
+        }
         graphics.text(font, "PAGE " + (page + 1) + " OF " + pages,
                 contentLeft() + 84, bottom - 37, MUTED);
         if (panelWidth() >= 620) {
