@@ -63,6 +63,19 @@ public final class AstraHud {
                 ? client.level.getDefaultClockTime() : client.level.getOverworldClockTime();
     }
 
+    private static boolean isFoodItem(String item) {
+        return item.contains("bread") || item.contains("apple") || item.contains("carrot")
+                || item.contains("potato") || item.contains("beef") || item.contains("porkchop")
+                || item.contains("chicken") || item.contains("mutton") || item.contains("rabbit")
+                || item.contains("cod") || item.contains("salmon") || item.contains("melon")
+                || item.contains("cookie") || item.contains("cake") || item.contains("pie")
+                || item.contains("stew") || item.contains("soup") || item.contains("berries")
+                || item.contains("chorus_fruit") || item.contains("dried_kelp")
+                || item.contains("honey_bottle") || item.contains("tropical_fish")
+                || item.contains("pufferfish") || item.contains("rotten_flesh")
+                || item.contains("spider_eye");
+    }
+
     public static void noteChunkUpdate() { chunkUpdates++; }
 
     public static void extract(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
@@ -429,17 +442,17 @@ public final class AstraHud {
                 if (item.equals("totem_of_undying")) totems += stack.getCount();
                 if (item.contains("arrow")) arrows += stack.getCount();
                 if (item.contains("potion")) potions += stack.getCount();
-                if (item.contains("bread") || item.contains("apple") || item.contains("carrot")
-                        || item.contains("potato") || item.contains("beef") || item.contains("porkchop")
-                        || item.contains("chicken") || item.contains("mutton") || item.contains("rabbit")
-                        || item.contains("cod") || item.contains("salmon") || item.contains("melon")
-                        || item.contains("cookie") || item.contains("cake") || item.contains("pie")
-                        || item.contains("stew") || item.contains("soup") || item.contains("berries")
-                        || item.contains("chorus_fruit") || item.contains("dried_kelp")
-                        || item.contains("honey_bottle") || item.contains("tropical_fish")
-                        || item.contains("pufferfish") || item.contains("rotten_flesh")
-                        || item.contains("spider_eye")) food += stack.getCount();
+                if (isFoodItem(item)) food += stack.getCount();
                 
+            }
+            // Offhand items are carried items, but are not part of the 36 main inventory slots.
+            ItemStack offhandCounter = client.player.getOffhandItem();
+            if (!offhandCounter.isEmpty()) {
+                String item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(offhandCounter.getItem()).getPath();
+                if (item.equals("totem_of_undying")) totems += offhandCounter.getCount();
+                if (item.contains("arrow")) arrows += offhandCounter.getCount();
+                if (item.contains("potion")) potions += offhandCounter.getCount();
+                if (isFoodItem(item)) food += offhandCounter.getCount();
             }
             if (AstraModules.isEnabled("Inventory Status")) { drawLine(graphics, client, x, y, 210, "Inventory  " + occupied + " used, " + empty + " empty"); y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; } }
@@ -1009,6 +1022,12 @@ public final class AstraHud {
                 if (stack.is(net.minecraft.world.item.Items.ENDER_PEARL)) pearls += stack.getCount();
                 if (stack.is(net.minecraft.world.item.Items.GOLDEN_APPLE)
                         || stack.is(net.minecraft.world.item.Items.ENCHANTED_GOLDEN_APPLE)) goldenApples += stack.getCount();
+            }
+            ItemStack offhandStack = client.player.getOffhandItem();
+            if (offhandStack.is(net.minecraft.world.item.Items.ENDER_PEARL)) pearls += offhandStack.getCount();
+            if (offhandStack.is(net.minecraft.world.item.Items.GOLDEN_APPLE)
+                    || offhandStack.is(net.minecraft.world.item.Items.ENCHANTED_GOLDEN_APPLE)) {
+                goldenApples += offhandStack.getCount();
             }
             if (AstraModules.isEnabled("Ender Pearl Counter")) {
                 drawLine(graphics, client, x, y, 150, "Ender pearls  " + pearls);
