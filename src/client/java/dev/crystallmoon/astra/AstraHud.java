@@ -141,8 +141,12 @@ public final class AstraHud {
         int screenHeight = client.getWindow().getGuiScaledHeight();
         hudContentRight = screenWidth - (AstraModules.isEnabled("Keystrokes") ? 170 : 8);
         hudOverflow = false;
-        int layoutBottom = screenHeight - (AstraModules.isEnabled("Armor Status") ? 64 : 8)
-                - (AstraModules.isEnabled("Hotbar") ? 30 : 0);
+        int bottomReserve = 8;
+        if (AstraModules.isEnabled("Armor Status")) {
+            bottomReserve = Math.max(bottomReserve, screenWidth < 442 ? 82 : 64);
+        }
+        if (AstraModules.isEnabled("Hotbar")) bottomReserve = Math.max(bottomReserve, 30);
+        int layoutBottom = screenHeight - bottomReserve;
         int x = 8;
         int y = 8;
         if (AstraModules.isEnabled("Coordinates")) {
@@ -239,7 +243,7 @@ public final class AstraHud {
         }
         if (AstraModules.isEnabled("Armor Status")) {
             int armorX = 8;
-            int armorY = client.getWindow().getGuiScaledHeight() - 58;
+            int armorY = screenWidth < 442 ? screenHeight - 72 : screenHeight - 58;
             graphics.fill(armorX - 4, armorY - 4, armorX + 4 * 30 + 2, armorY + 48, BACKGROUND);
             EquipmentSlot[] armorSlots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST,
                     EquipmentSlot.LEGS, EquipmentSlot.FEET};
@@ -830,25 +834,26 @@ public final class AstraHud {
             }
         }
         if (AstraModules.isEnabled("Hotbar")) {
-            int slotSize = 22;
-            int hotbarX = (client.getWindow().getGuiScaledWidth() - slotSize * 9) / 2;
-            int hotbarY = client.getWindow().getGuiScaledHeight() - 30;
+            int hotbarX = (screenWidth - 182) / 2;
+            int hotbarY = screenHeight - 22;
+            // Cover the vanilla bar completely, then redraw the nine real slots.
+            graphics.fill(hotbarX, hotbarY, hotbarX + 182, hotbarY + 22, BACKGROUND);
             for (int i = 0; i < 9; i++) {
-                int slotX = hotbarX + i * slotSize;
+                int slotX = hotbarX + 1 + i * 20;
                 ItemStack stack = client.player.getInventory().getItem(i);
                 boolean selected = i == client.player.getInventory().getSelectedSlot();
-                graphics.fill(slotX, hotbarY, slotX + 20, hotbarY + 20,
+                graphics.fill(slotX, hotbarY + 1, slotX + 20, hotbarY + 21,
                         selected ? 0xFF526D91 : 0xBB10141C);
                 if (selected) {
-                    graphics.fill(slotX, hotbarY, slotX + 20, hotbarY + 1, ACCENT);
-                    graphics.fill(slotX, hotbarY + 19, slotX + 20, hotbarY + 20, ACCENT);
+                    graphics.fill(slotX, hotbarY + 1, slotX + 20, hotbarY + 2, ACCENT);
+                    graphics.fill(slotX, hotbarY + 20, slotX + 20, hotbarY + 21, ACCENT);
                 }
                 if (!stack.isEmpty()) {
-                    graphics.item(stack, slotX + 2, hotbarY + 2);
+                    graphics.item(stack, slotX + 2, hotbarY + 3);
                     if (stack.getCount() > 1) {
                         String count = Integer.toString(stack.getCount());
                         graphics.text(client.font, count,
-                                slotX + 19 - client.font.width(count), hotbarY + 11, WHITE);
+                                slotX + 19 - client.font.width(count), hotbarY + 12, WHITE);
                     }
                 }
             }
