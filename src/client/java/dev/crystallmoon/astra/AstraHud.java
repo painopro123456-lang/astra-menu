@@ -205,8 +205,10 @@ public final class AstraHud {
             }
         }
         if (AstraModules.isEnabled("Keystrokes")) {
-            int keyY = Math.max(8, client.getWindow().getGuiScaledHeight() - 82);
-            int center = client.getWindow().getGuiScaledWidth() / 2;
+            // Keep the traditional key display in the upper-right corner so it
+            // never collides with the vanilla/custom hotbar or Armor Status.
+            int keyY = 8;
+            int center = client.getWindow().getGuiScaledWidth() - 60;
             drawKey(graphics, client, center - 12, keyY, "W", client.options.keyUp.isDown());
             drawKey(graphics, client, center - 36, keyY + 23, "A", client.options.keyLeft.isDown());
             drawKey(graphics, client, center - 12, keyY + 23, "S", client.options.keyDown.isDown());
