@@ -278,16 +278,26 @@ public final class AstraHud {
         }
         if (AstraModules.isEnabled("Nether Coordinates")) {
             boolean nether = client.level.dimension().toString().contains("the_nether");
+            // Show the equivalent Nether coordinates when in the Overworld, and
+            // equivalent Overworld coordinates when in the Nether.
             double scale = nether ? 8.0 : 0.125;
-            drawLine(graphics, client, x, y, 190, "Nether XYZ  " + (int)(client.player.getX()*scale) + "  " + (int)client.player.getY() + "  " + (int)(client.player.getZ()*scale)); y += 24;
+            drawLine(graphics, client, x, y, 190, "Equivalent XYZ  " + (int)(client.player.getX()*scale) + "  " + (int)client.player.getY() + "  " + (int)(client.player.getZ()*scale)); y += 24;
         }
         if (AstraModules.isEnabled("Real Time")) {
             drawLine(graphics, client, x, y, 130, "Real time  " + CLOCK.format(LocalTime.now())); y += 24;
         }
         if (AstraModules.isEnabled("Facing") || AstraModules.isEnabled("Compass")) {
-            String[] points = {"S","SW","W","NW","N","NE","E","SE"};
-            String point = points[Math.floorMod(Math.round(client.player.getYRot()/45.0f), 8)];
-            drawLine(graphics, client, x, y, 130, "Compass  " + point); y += 24;
+            String[] points = {"South","South-West","West","North-West","North","North-East","East","South-East"};
+            String[] abbreviations = {"S","SW","W","NW","N","NE","E","SE"};
+            int directionIndex = Math.floorMod(Math.round(client.player.getYRot() / 45.0f), 8);
+            if (AstraModules.isEnabled("Facing")) {
+                drawLine(graphics, client, x, y, 150, "Facing  " + points[directionIndex]);
+                y += 24;
+            }
+            if (AstraModules.isEnabled("Compass")) {
+                drawLine(graphics, client, x, y, 130, "Compass  " + abbreviations[directionIndex]);
+                y += 24;
+            }
         }
         if (AstraModules.isEnabled("Held Item")) {
             ItemStack held = client.player.getMainHandItem();
@@ -400,10 +410,14 @@ public final class AstraHud {
             drawLine(graphics, client, x, y, 145, "Difficulty  " + client.level.getDifficulty());
             y += 24;
         }
-        if (AstraModules.isEnabled("Movement Speed") || AstraModules.isEnabled("Horizontal Speed")) {
+        if (AstraModules.isEnabled("Movement Speed")) {
+            double speed = client.player.getDeltaMovement().length() * 20.0;
+            drawLine(graphics, client, x, y, 165, String.format("Movement speed  %.2f m/s", speed));
+            y += 24;
+        }
+        if (AstraModules.isEnabled("Horizontal Speed")) {
             double speed = client.player.getDeltaMovement().horizontalDistance() * 20.0;
-            String label = AstraModules.isEnabled("Movement Speed") ? "Movement speed  " : "Horizontal speed  ";
-            drawLine(graphics, client, x, y, 165, String.format(label + "%.2f m/s", speed));
+            drawLine(graphics, client, x, y, 165, String.format("Horizontal speed  %.2f m/s", speed));
             y += 24;
         }
         if (AstraModules.isEnabled("Vertical Speed")) {
