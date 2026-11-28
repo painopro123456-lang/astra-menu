@@ -13,7 +13,7 @@ public final class AstraScreen extends Screen {
     private static final int ACCENT = 0xFF9BC7FF;
     private static final int WHITE = 0xFFF4F7FC;
     private static final int MUTED = 0xFF9AA7B8;
-    private static final String[] CATEGORIES = {"All", "HUD", "Player", "World", "Items", "Visual"};
+    private static final String[] CATEGORIES = {"All", "HUD", "Player", "World", "Items", "Visual", "Utility"};
     private static final int PAGE_SIZE = 12;
 
     private String category = "All";
@@ -83,19 +83,39 @@ public final class AstraScreen extends Screen {
         if (List.of("FPS Counter", "Coordinates", "Direction", "Clock", "Ping Display",
                 "CPS Counter", "Keystrokes", "Armor Status", "Health HUD", "Hunger HUD",
                 "Experience HUD", "Speedometer", "Status Effects", "Potion Timers",
-                "Jump Height").contains(name)) return "HUD";
+                "Jump Height", "Saturation HUD", "Fall Distance", "Absorption", "Air HUD",
+                "Health Bar", "Armor Points", "Attack Cooldown", "Yaw Pitch",
+                "Coordinates HUD").contains(name)) return "HUD";
+
         if (List.of("Sprint Status", "Movement Speed", "Velocity", "Elytra Speed",
-                "Vehicle HUD", "Game Mode").contains(name)) return "Player";
+                "Vehicle HUD", "Game Mode", "Player Height", "Player Name",
+                "Main Hand Durability", "Offhand Durability", "Total Armor Durability",
+                "Player Food Level", "Player Air Supply", "Player Experience Level",
+                "Player Rotation", "Player Ground Status", "Player Sneaking Status",
+                "Horizontal Speed", "Vertical Speed", "Horse Speed", "Boat Speed",
+                "Mount Health").contains(name)) return "Player";
+
         if (List.of("World Time", "Dimension", "Light Level", "Day Counter", "Biome",
                 "Nether Coordinates", "Weather", "Moon Phase", "Difficulty",
-                "Spawnable Light", "Block Info", "Mining Speed").contains(name)) return "World";
+                "Spawnable Light", "Block Info", "Mining Speed", "Block Coordinates",
+                "Chunk Coordinates", "Chunk Section", "Region Coordinates", "Dimension ID",
+                "Block Resistance", "Harvest Level", "Light Overlay", "Breaking Progress",
+                "Target Block", "Looking At", "Target Coordinates", "Target Distance",
+                "World Age", "Chunk Updates").contains(name)) return "World";
+
         if (List.of("Item Counter", "Inventory Status", "Empty Slots", "Totem Counter",
                 "Arrow Counter", "Potion Counter", "Durability", "Armor Durability",
-                "Hotbar").contains(name)) return "Items";
-        if (List.of("Crosshair", "Effect Icons", "Target HUD", "Target Health", "Target Max Health",
-                "Target Armor", "Target Absorption", "Target Name", "Target Type", "Target Entity ID",
-                "Target Held Item").contains(name)) return "Visual";
-        return "All";
+                "Hotbar", "Held Item", "Offhand Item", "Food Counter", "Tool Durability",
+                "Held Item Name", "Held Item Count", "Offhand Item Name", "Offhand Item Count",
+                "Selected Hotbar Slot", "Inventory Used Slots", "Inventory Fill Percentage",
+                "Ender Pearl Counter", "Golden Apple Counter").contains(name)) return "Items";
+
+        if (List.of("Crosshair", "Effect Icons", "Target HUD", "Arrow Trajectory",
+                "Target Health", "Target Max Health", "Target Armor", "Target Absorption",
+                "Target Name", "Target Type", "Target Entity ID", "Target Held Item",
+                "Boss Bar").contains(name)) return "Visual";
+
+        return "Utility";
     }
 
     @Override
