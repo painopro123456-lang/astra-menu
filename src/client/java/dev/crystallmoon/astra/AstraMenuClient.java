@@ -24,7 +24,6 @@ public final class AstraMenuClient implements ClientModInitializer {
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("astra_menu", "classic_hud"), AstraHud::extract);
 
         net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.level != null) AstraHud.noteServerTime(client.level.getGameTime());
             while (openMenu.consumeClick()) {
                 if (client.gui.screen() instanceof AstraScreen) client.gui.setScreen(null);
                 else if (client.player != null) client.gui.setScreen(new AstraScreen());
