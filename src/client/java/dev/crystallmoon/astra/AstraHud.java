@@ -177,29 +177,30 @@ public final class AstraHud {
         }
         if (AstraModules.isEnabled("Armor Status")) {
             int armorX = 8;
-            int armorY = client.getWindow().getGuiScaledHeight() - 42;
-            graphics.fill(armorX - 4, armorY - 4, armorX + 4 * 30 + 2, armorY + 34, BACKGROUND);
+            int armorY = client.getWindow().getGuiScaledHeight() - 58;
+            graphics.fill(armorX - 4, armorY - 4, armorX + 4 * 30 + 2, armorY + 48, BACKGROUND);
             EquipmentSlot[] armorSlots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST,
                     EquipmentSlot.LEGS, EquipmentSlot.FEET};
             for (int i = 0; i < armorSlots.length; i++) {
                 ItemStack stack = client.player.getItemBySlot(armorSlots[i]);
                 int slotX = armorX + i * 30;
-                graphics.fill(slotX, armorY, slotX + 26, armorY + 26, 0xAA202631);
+                graphics.fill(slotX, armorY, slotX + 26, armorY + 44, 0xAA202631);
                 if (!stack.isEmpty()) {
-                    String armorName = stack.getHoverName().getString();
-                    String shortName = armorName.length() > 3 ? armorName.substring(0, 3) : armorName;
-                    graphics.text(client.font, shortName, slotX + 3, armorY + 8, WHITE);
+                    graphics.item(stack, slotX + 5, armorY + 2);
                     if (stack.isDamageableItem()) {
                         int remaining = Math.max(0, stack.getMaxDamage() - stack.getDamageValue());
+                        String durability = Integer.toString(remaining);
+                        int textX = slotX + Math.max(1, (26 - client.font.width(durability)) / 2);
+                        graphics.text(client.font, durability, textX, armorY + 20, WHITE);
                         int barWidth = Math.max(0, 22 * remaining / stack.getMaxDamage());
                         int barColor = remaining * 2 < stack.getMaxDamage() ? 0xFFE45B5B
                                 : remaining * 4 < stack.getMaxDamage() * 3 ? 0xFFE5B65B : 0xFF65D58A;
-                        graphics.fill(slotX + 2, armorY + 22, slotX + 24, armorY + 25, 0xFF343A45);
-                        if (barWidth > 0) graphics.fill(slotX + 2, armorY + 22,
-                                slotX + 2 + barWidth, armorY + 25, barColor);
+                        graphics.fill(slotX + 2, armorY + 39, slotX + 24, armorY + 42, 0xFF343A45);
+                        if (barWidth > 0) graphics.fill(slotX + 2, armorY + 39,
+                                slotX + 2 + barWidth, armorY + 42, barColor);
                     }
                 } else {
-                    graphics.text(client.font, "-", slotX + 11, armorY + 8, 0xFF8A93A3);
+                    graphics.text(client.font, "-", slotX + 11, armorY + 15, 0xFF8A93A3);
                 }
             }
         }
@@ -641,13 +642,28 @@ public final class AstraHud {
             }
         }
         if (AstraModules.isEnabled("Hotbar")) {
-            StringBuilder hotbar = new StringBuilder("Hotbar  ");
+            int slotSize = 22;
+            int hotbarX = (client.getWindow().getGuiScaledWidth() - slotSize * 9) / 2;
+            int hotbarY = client.getWindow().getGuiScaledHeight() - 30;
             for (int i = 0; i < 9; i++) {
+                int slotX = hotbarX + i * slotSize;
                 ItemStack stack = client.player.getInventory().getItem(i);
-                hotbar.append(stack.isEmpty() ? "-" : stack.getCount()).append("  ");
+                boolean selected = i == client.player.getInventory().getSelectedSlot();
+                graphics.fill(slotX, hotbarY, slotX + 20, hotbarY + 20,
+                        selected ? 0xFF526D91 : 0xBB10141C);
+                if (selected) {
+                    graphics.fill(slotX, hotbarY, slotX + 20, hotbarY + 1, ACCENT);
+                    graphics.fill(slotX, hotbarY + 19, slotX + 20, hotbarY + 20, ACCENT);
+                }
+                if (!stack.isEmpty()) {
+                    graphics.item(stack, slotX + 2, hotbarY + 2);
+                    if (stack.getCount() > 1) {
+                        String count = Integer.toString(stack.getCount());
+                        graphics.text(client.font, count,
+                                slotX + 19 - client.font.width(count), hotbarY + 11, WHITE);
+                    }
+                }
             }
-            drawLine(graphics, client, x, y, 220, hotbar.toString());
-            y += 24;
         }
         if (AstraModules.isEnabled("Player Counter")) {
             long players = client.level.players().stream().filter(player -> player != client.player).count();
