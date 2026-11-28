@@ -1130,8 +1130,12 @@ public final class AstraHud {
         }
 
         if (AstraModules.isEnabled("Player Height")) {
+            int minBuildY = client.level.getMinY();
+            int maxBuildY = client.level.getMaxY();
+            double altitudeProgress = client.player.getY() - minBuildY;
             drawMetric(graphics, client, x, y, 150, "ALTITUDE",
-                    Integer.toString(client.player.getBlockY()), client.player.getBlockY(), 320.0, ACCENT);
+                    String.format("%.1f", client.player.getY()), altitudeProgress,
+                    Math.max(1, maxBuildY - minBuildY), ACCENT);
             y += 34;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
