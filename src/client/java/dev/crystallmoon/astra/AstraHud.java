@@ -866,10 +866,15 @@ public final class AstraHud {
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
                 if (AstraModules.isEnabled("Light Overlay")) {
-                    int light = client.level.getMaxLocalRawBrightness(pos);
-                    drawLine(graphics, client, x, y, 190, "Block light  " + light);
+                    int light = client.level.getBrightness(LightLayer.BLOCK, pos);
+                    int color = light == 0 ? 0xFFE45B5B : light < 8 ? 0xFFE5B65B : 0xFF65D58A;
+                    if (x + 214 <= hudContentRight) {
+                        graphics.fill(x, y, x + 20, y + 20, color);
+                        graphics.text(client.font, Integer.toString(light), x + 6, y + 6, WHITE);
+                    }
+                    drawLine(graphics, client, x + 24, y, 190, "Target block light");
                     y += 24;
-            if (y + 46 > layoutBottom) { y = 8; x += 250; }
+                    if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
             } else if (AstraModules.isEnabled("Mining Speed")
                     || AstraModules.isEnabled("Block Resistance") || AstraModules.isEnabled("Harvest Level")
