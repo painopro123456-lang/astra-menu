@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.UUID;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -23,7 +24,6 @@ public final class AstraHud {
     private static double jumpPeakY = Double.NaN;
     private static boolean leftWasDown;
     private static boolean rightWasDown;
-    private static final Deque<Long> CLICK_TIMES = new ArrayDeque<>();
     private static final Deque<Long> LEFT_CLICK_TIMES = new ArrayDeque<>();
     private static final Deque<Long> RIGHT_CLICK_TIMES = new ArrayDeque<>();
     private static final int[] FPS_SAMPLES = new int[32];
@@ -37,6 +37,7 @@ public final class AstraHud {
     private static long lastServerGameTime = -1L;
     private static long lastServerTimeNanos;
     private static double estimatedServerTps = -1.0;
+    private static UUID trackedPlayerId;
 
     public static void noteServerTime(long gameTime) {
         long now = System.nanoTime();
@@ -56,6 +57,20 @@ public final class AstraHud {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null || client.level == null) return;
 
+        UUID currentPlayerId = client.player.getUUID();
+        if (!currentPlayerId.equals(trackedPlayerId)) {
+            trackedPlayerId = currentPlayerId;
+            previousHealth = -1.0f;
+            lastDamageAmount = 0.0f;
+            lastDamageNanos = 0L;
+            jumpStartY = Double.NaN;
+            jumpPeakY = Double.NaN;
+            leftWasDown = false;
+            rightWasDown = false;
+            LEFT_CLICK_TIMES.clear();
+            RIGHT_CLICK_TIMES.clear();
+        }
+
         if (client.player.onGround()) {
             jumpStartY = client.player.getY();
             jumpPeakY = jumpStartY;
@@ -71,13 +86,13 @@ public final class AstraHud {
         }
         previousHealth = currentHealth;
         long window = GLFW.glfwGetCurrentContext();
-        boolean leftDown = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
-        boolean rightDown = GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS;
-        if (leftDown && !leftWasDown) { CLICK_TIMES.addLast(now); LEFT_CLICK_TIMES.addLast(now); }
-        if (rightDown && !rightWasDown) { CLICK_TIMES.addLast(now); RIGHT_CLICK_TIMES.addLast(now); }
+        boolean inGameInput = client.gui.screen() == null;
+        boolean leftDown = inGameInput && GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
+        boolean rightDown = inGameInput && GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS;
+        if (leftDown && !leftWasDown) LEFT_CLICK_TIMES.addLast(now);
+        if (rightDown && !rightWasDown) RIGHT_CLICK_TIMES.addLast(now);
         leftWasDown = leftDown;
         rightWasDown = rightDown;
-        while (!CLICK_TIMES.isEmpty() && now - CLICK_TIMES.peekFirst() > 1_000_000_000L) CLICK_TIMES.removeFirst();
         while (!LEFT_CLICK_TIMES.isEmpty() && now - LEFT_CLICK_TIMES.peekFirst() > 1_000_000_000L) LEFT_CLICK_TIMES.removeFirst();
         while (!RIGHT_CLICK_TIMES.isEmpty() && now - RIGHT_CLICK_TIMES.peekFirst() > 1_000_000_000L) RIGHT_CLICK_TIMES.removeFirst();
         if (now - lastGraphSample >= 250_000_000L) {
@@ -215,9 +230,9 @@ public final class AstraHud {
             drawKey(graphics, client, center + 12, keyY + 23, "D", client.options.keyRight.isDown());
             drawKey(graphics, client, center - 12, keyY + 46, "SPACE", client.options.keyJump.isDown(), 46);
             drawKey(graphics, client, center - 36, keyY + 69, "LMB",
-                    GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS, 34);
+                    inGameInput && GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS, 34);
             drawKey(graphics, client, center + 2, keyY + 69, "RMB",
-                    GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS, 34);
+                    inGameInput && GLFW.glfwGetMouseButton(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS, 34);
         }
 
         if (AstraModules.isEnabled("Item Counter")) {
@@ -266,25 +281,33 @@ public final class AstraHud {
         }
         if (AstraModules.isEnabled("Day Counter") || AstraModules.isEnabled("World Age")) {
             long dayTime = client.level.getLevelData().getDayTime();
+            long worldAge = client.level.getLevelData().getGameTime();
             if (AstraModules.isEnabled("Day Counter")) {
                 drawLine(graphics, client, x, y, 120, "Day  " + (dayTime / 24000L + 1));
                 y += 24;
             }
             if (AstraModules.isEnabled("World Age")) {
-                drawLine(graphics, client, x, y, 145, "World age  " + dayTime + " ticks");
+                drawLine(graphics, client, x, y, 145, "World age  " + worldAge + " ticks");
                 y += 24;
             }
         }
         if (AstraModules.isEnabled("Biome")) {
-            String biome = client.level.getBiome(client.player.blockPosition()).toString();
+            String biome = client.level.getBiome(client.player.blockPosition()).unwrapKey()
+                    .map(key -> key.location().toString()).orElse("Unknown");
             drawLine(graphics, client, x, y, 190, "Biome  " + biome); y += 24;
         }
         if (AstraModules.isEnabled("Nether Coordinates")) {
-            boolean nether = client.level.dimension().toString().contains("the_nether");
-            // Show the equivalent Nether coordinates when in the Overworld, and
-            // equivalent Overworld coordinates when in the Nether.
-            double scale = nether ? 8.0 : 0.125;
-            drawLine(graphics, client, x, y, 190, "Equivalent XYZ  " + (int)(client.player.getX()*scale) + "  " + (int)client.player.getY() + "  " + (int)(client.player.getZ()*scale)); y += 24;
+            String dimensionId = client.level.dimension().toString();
+            if (dimensionId.contains("the_nether") || dimensionId.contains("overworld")) {
+                // Nether coordinates are 1:8 relative to the Overworld.
+                double scale = dimensionId.contains("the_nether") ? 8.0 : 0.125;
+                drawLine(graphics, client, x, y, 210, "Equivalent XYZ  "
+                        + (int) (client.player.getX() * scale) + "  " + (int) client.player.getY()
+                        + "  " + (int) (client.player.getZ() * scale));
+            } else {
+                drawLine(graphics, client, x, y, 210, "Equivalent XYZ  N/A in this dimension");
+            }
+            y += 24;
         }
         if (AstraModules.isEnabled("Real Time")) {
             drawLine(graphics, client, x, y, 130, "Real time  " + CLOCK.format(LocalTime.now())); y += 24;
@@ -316,7 +339,7 @@ public final class AstraHud {
         if (AstraModules.isEnabled("Moon Phase")) {
             String[] phases = {"Full moon", "Waning gibbous", "Last quarter", "Waning crescent",
                     "New moon", "Waxing crescent", "First quarter", "Waxing gibbous"};
-            int phase = (int) Math.floorMod(client.level.getLevelData().getGameTime() / 24000L, 8L);
+            int phase = (int) Math.floorMod(client.level.getLevelData().getDayTime() / 24000L, 8L);
             drawLine(graphics, client, x, y, 150, "Moon  " + phases[Math.floorMod(phase, phases.length)]);
             y += 24;
         }
@@ -327,8 +350,7 @@ public final class AstraHud {
                 || AstraModules.isEnabled("Totem Counter") || AstraModules.isEnabled("Arrow Counter")
                 || AstraModules.isEnabled("Food Counter") || AstraModules.isEnabled("Potion Counter")) {
             int empty = 0, occupied = 0, totems = 0, arrows = 0, food = 0, potions = 0;
-            for (int i = 0; i < client.player.getInventory().getContainerSize(); i++) {
-                ItemStack stack = client.player.getInventory().getItem(i);
+            for (ItemStack stack : client.player.getInventory().getNonEquipmentItems()) {
                 if (stack.isEmpty()) { empty++; continue; }
                 occupied++;
                 String item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
