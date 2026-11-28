@@ -18,6 +18,7 @@ public final class AstraHud {
     private static final int WHITE = 0xFFF2F3F5;
     private static final int ACCENT = 0xFF9DBBEE;
     private static final DateTimeFormatter CLOCK = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final DateTimeFormatter REAL_CLOCK = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final long SESSION_START_NANOS = System.nanoTime();
     private static double jumpStartY = Double.NaN;
     private static double jumpPeakY = Double.NaN;
@@ -260,7 +261,13 @@ public final class AstraHud {
 
         if (AstraModules.isEnabled("Item Counter")) {
             ItemStack held = client.player.getMainHandItem();
-            drawLine(graphics, client, x, y, 125, "Held item  " + (held.isEmpty() ? "None" : held.getCount()));
+            int totalHeld = 0;
+            if (!held.isEmpty()) {
+                for (ItemStack stack : client.player.getInventory().getNonEquipmentItems()) {
+                    if (!stack.isEmpty() && stack.getItem() == held.getItem()) totalHeld += stack.getCount();
+                }
+            }
+            drawLine(graphics, client, x, y, 160, "Item total  " + totalHeld);
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
@@ -307,7 +314,8 @@ public final class AstraHud {
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Weather")) {
-            drawLine(graphics, client, x, y, 125, "Weather  " + (client.level.isRaining() ? "Rain" : "Clear"));
+            drawLine(graphics, client, x, y, 145, "Weather  " + (client.level.isThundering() ? "Thunderstorm"
+                    : client.level.isRaining() ? "Rain" : "Clear"));
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
@@ -346,7 +354,7 @@ public final class AstraHud {
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Real Time")) {
-            drawLine(graphics, client, x, y, 130, "Real time  " + CLOCK.format(LocalTime.now())); y += 24;
+            drawLine(graphics, client, x, y, 190, "Real time  " + REAL_CLOCK.format(java.time.LocalDateTime.now())); y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Facing") || AstraModules.isEnabled("Compass")) {
@@ -366,12 +374,22 @@ public final class AstraHud {
         }
         if (AstraModules.isEnabled("Held Item")) {
             ItemStack held = client.player.getMainHandItem();
-            drawLine(graphics, client, x, y, 190, "Held  " + (held.isEmpty() ? "Empty" : held.getHoverName().getString())); y += 24;
+            if (x + 214 <= hudContentRight) {
+                if (!held.isEmpty()) graphics.item(held, x + 2, y + 2);
+                drawLine(graphics, client, x + 24, y, 190,
+                        "Held  " + (held.isEmpty() ? "Empty" : held.getHoverName().getString()));
+            }
+            y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Offhand Item")) {
             ItemStack held = client.player.getOffhandItem();
-            drawLine(graphics, client, x, y, 190, "Offhand  " + (held.isEmpty() ? "Empty" : held.getHoverName().getString())); y += 24;
+            if (x + 214 <= hudContentRight) {
+                if (!held.isEmpty()) graphics.item(held, x + 2, y + 2);
+                drawLine(graphics, client, x + 24, y, 190,
+                        "Offhand  " + (held.isEmpty() ? "Empty" : held.getHoverName().getString()));
+            }
+            y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Rain Status")) {
