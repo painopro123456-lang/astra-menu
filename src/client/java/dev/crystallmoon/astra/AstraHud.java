@@ -325,7 +325,7 @@ public final class AstraHud {
         }
         if (AstraModules.isEnabled("Biome")) {
             String biome = client.level.getBiome(client.player.blockPosition()).unwrapKey()
-                    .map(key -> key.location().toString()).orElse("Unknown");
+                    .map(key -> key.identifier().toString()).orElse("Unknown");
             drawLine(graphics, client, x, y, 190, "Biome  " + biome); y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
