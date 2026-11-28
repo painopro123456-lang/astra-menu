@@ -1133,11 +1133,6 @@ public final class AstraHud {
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
-        if (x + 240 > hudContentRight) {
-            graphics.text(client.font, "More enabled HUDs exist than fit on this screen.",
-                    Math.max(8, (screenWidth - client.font.width("More enabled HUDs exist than fit on this screen.")) / 2),
-                    8, 0xFFFFD27A);
-        }
         if (AstraModules.isEnabled("Spawnable Light")) {
             int light = client.level.getMaxLocalRawBrightness(client.player.blockPosition());
             drawLine(graphics, client, x, y, 165, "Spawn light  " + light + (light < 8 ? "  (hostile spawn risk)" : ""));
