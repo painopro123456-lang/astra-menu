@@ -757,14 +757,14 @@ public final class AstraHud {
         }
         if (AstraModules.isEnabled("Selected Hotbar Slot")) {
             drawMetric(graphics, client, x, y, 150, "SELECTED SLOT",
-                    Integer.toString(client.player.getInventory().selected + 1),
-                    client.player.getInventory().selected + 1, 9.0, ACCENT);
+                    Integer.toString(client.player.getInventory().getSelectedSlot() + 1),
+                    client.player.getInventory().getSelectedSlot() + 1, 9.0, ACCENT);
             y += 34;
         }
         if (AstraModules.isEnabled("Inventory Used Slots") || AstraModules.isEnabled("Inventory Fill Percentage")) {
             int usedSlots = 0;
-            int totalSlots = client.player.getInventory().items.size();
-            for (ItemStack stack : client.player.getInventory().items) if (!stack.isEmpty()) usedSlots++;
+            int totalSlots = client.player.getInventory().getNonEquipmentItems().size();
+            for (ItemStack stack : client.player.getInventory().getNonEquipmentItems()) if (!stack.isEmpty()) usedSlots++;
             if (AstraModules.isEnabled("Inventory Used Slots")) {
                 drawLine(graphics, client, x, y, 160, "Used slots  " + usedSlots + " / " + totalSlots);
                 y += 24;
@@ -778,7 +778,7 @@ public final class AstraHud {
         if (AstraModules.isEnabled("Ender Pearl Counter") || AstraModules.isEnabled("Golden Apple Counter")) {
             int pearls = 0;
             int goldenApples = 0;
-            for (ItemStack stack : client.player.getInventory().items) {
+            for (ItemStack stack : client.player.getInventory().getNonEquipmentItems()) {
                 if (stack.is(net.minecraft.world.item.Items.ENDER_PEARL)) pearls += stack.getCount();
                 if (stack.is(net.minecraft.world.item.Items.GOLDEN_APPLE)
                         || stack.is(net.minecraft.world.item.Items.ENCHANTED_GOLDEN_APPLE)) goldenApples += stack.getCount();
