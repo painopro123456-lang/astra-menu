@@ -38,6 +38,7 @@ public final class AstraHud {
     private static long lastServerTimeNanos;
     private static double estimatedServerTps = -1.0;
     private static UUID trackedPlayerId;
+    private static int hudContentRight;
 
     public static void noteServerTime(long gameTime) {
         long now = System.nanoTime();
@@ -104,17 +105,26 @@ public final class AstraHud {
             lastGraphSample = now;
         }
 
+        int screenWidth = client.getWindow().getGuiScaledWidth();
+        int screenHeight = client.getWindow().getGuiScaledHeight();
+        hudContentRight = screenWidth - (AstraModules.isEnabled("Keystrokes") ? 170 : 8);
+        int layoutBottom = screenHeight - (AstraModules.isEnabled("Armor Status") ? 64 : 8)
+                - (AstraModules.isEnabled("Hotbar") ? 30 : 0);
         int x = 8;
         int y = 8;
         if (AstraModules.isEnabled("Coordinates")) {
-            drawPanel(graphics, client, x, y, 190, "POSITION");
-            graphics.text(client.font, String.format("X %.1f   Y %.1f   Z %.1f",
-                    client.player.getX(), client.player.getY(), client.player.getZ()), x + 7, y + 15, WHITE);
+            if (x + 190 <= hudContentRight) {
+                drawPanel(graphics, client, x, y, 190, "POSITION");
+                graphics.text(client.font, String.format("X %.1f   Y %.1f   Z %.1f",
+                        client.player.getX(), client.player.getY(), client.player.getZ()), x + 7, y + 15, WHITE);
+            }
             y += 38;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("FPS Counter")) {
             drawMetric(graphics, client, x, y, 112, "FPS", Integer.toString(client.getFps()), client.getFps(), 240, ACCENT);
             y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Direction")) {
             float yaw = client.player.getYRot();
@@ -130,38 +140,47 @@ public final class AstraHud {
             };
             drawLine(graphics, client, x, y, 130, "Facing  " + direction);
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Clock")) {
             drawLine(graphics, client, x, y, 110, "Time  " + CLOCK.format(LocalTime.now()));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Health HUD")) {
             drawMeter(graphics, client, x, y, 150, "HEALTH", client.player.getHealth(),
                     client.player.getMaxHealth(), 0xFFE45B68);
             y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Hunger HUD")) {
             drawMeter(graphics, client, x, y, 150, "HUNGER",
                     client.player.getFoodData().getFoodLevel(), 20.0, 0xFFE8B64F);
             y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Saturation HUD")) {
             drawLine(graphics, client, x, y, 145, String.format("Saturation  %.1f",
                     client.player.getFoodData().getSaturationLevel()));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Experience HUD")) {
-            drawPanel(graphics, client, x, y, 150, "EXPERIENCE  •  LVL " + client.player.experienceLevel);
-            graphics.fill(x + 7, y + 17, x + 143, y + 24, 0xFF343A45);
-            graphics.fill(x + 7, y + 17, x + 7 + Math.round(136 * client.player.experienceProgress),
-                    y + 24, 0xFF70D77C);
+            if (x + 150 <= hudContentRight) {
+                drawPanel(graphics, client, x, y, 150, "EXPERIENCE  •  LVL " + client.player.experienceLevel);
+                graphics.fill(x + 7, y + 17, x + 143, y + 24, 0xFF343A45);
+                graphics.fill(x + 7, y + 17, x + 7 + Math.round(136 * client.player.experienceProgress),
+                        y + 24, 0xFF70D77C);
+            }
             y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Speedometer")) {
             double speedKmh = client.player.getDeltaMovement().horizontalDistance() * 20.0 * 3.6;
             drawMetric(graphics, client, x, y, 150, "SPEED", String.format("%.1f km/h", speedKmh),
                     speedKmh, 45.0, ACCENT);
             y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("World Time")) {
             long ticks = Math.floorMod(client.level.getDefaultClockTime(), 24000L);
@@ -169,25 +188,30 @@ public final class AstraHud {
             long minutes = (ticks % 1000) * 60 / 1000;
             drawLine(graphics, client, x, y, 145, String.format("World  %02d:%02d", hours, minutes));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Dimension")) {
             drawLine(graphics, client, x, y, 180, "Dimension  " + client.level.dimension().toString());
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Light Level")) {
             int light = client.level.getMaxLocalRawBrightness(client.player.blockPosition());
             drawLine(graphics, client, x, y, 130, "Block light  " + light);
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Fall Distance")) {
             drawLine(graphics, client, x, y, 135, String.format("Fall  %.1f blocks", client.player.fallDistance));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Ping Display") && client.getConnection() != null) {
             var info = client.getConnection().getPlayerInfo(client.player.getUUID());
             if (info != null) {
                 drawLine(graphics, client, x, y, 110, "Ping  " + info.getLatency() + " ms");
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
         if (AstraModules.isEnabled("Armor Status")) {
@@ -239,30 +263,36 @@ public final class AstraHud {
             ItemStack held = client.player.getMainHandItem();
             drawLine(graphics, client, x, y, 125, "Held item  " + (held.isEmpty() ? "None" : held.getCount()));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Block Coordinates")) {
             drawLine(graphics, client, x, y, 150, "Block  " + client.player.blockPosition().toShortString());
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Chunk Coordinates")) {
             var pos = client.player.blockPosition();
             drawLine(graphics, client, x, y, 150, "Chunk  " + (pos.getX() >> 4) + "  " + (pos.getZ() >> 4));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Yaw Pitch")) {
             drawLine(graphics, client, x, y, 150, String.format("Yaw  %.1f   Pitch  %.1f",
                     client.player.getYRot(), client.player.getXRot()));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Absorption")) {
             drawLine(graphics, client, x, y, 140, String.format("Absorption  %.1f",
                     client.player.getAbsorptionAmount()));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Air HUD")) {
             drawLine(graphics, client, x, y, 120, "Air  " + client.player.getAirSupply()
                     + " / " + client.player.getMaxAirSupply());
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Memory Usage")) {
             Runtime runtime = Runtime.getRuntime();
@@ -270,14 +300,17 @@ public final class AstraHud {
             long max = runtime.maxMemory() / (1024L * 1024L);
             drawLine(graphics, client, x, y, 145, "Memory  " + used + " / " + max + " MB");
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Java Version")) {
             drawLine(graphics, client, x, y, 170, "Java  " + System.getProperty("java.version"));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Weather")) {
             drawLine(graphics, client, x, y, 125, "Weather  " + (client.level.isRaining() ? "Rain" : "Clear"));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Day Counter") || AstraModules.isEnabled("World Age")) {
             long dayTime = client.level.getDefaultClockTime();
@@ -285,16 +318,19 @@ public final class AstraHud {
             if (AstraModules.isEnabled("Day Counter")) {
                 drawLine(graphics, client, x, y, 120, "Day  " + (dayTime / 24000L + 1));
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("World Age")) {
                 drawLine(graphics, client, x, y, 145, "World age  " + worldAge + " ticks");
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
         if (AstraModules.isEnabled("Biome")) {
             String biome = client.level.getBiome(client.player.blockPosition()).unwrapKey()
                     .map(key -> key.location().toString()).orElse("Unknown");
             drawLine(graphics, client, x, y, 190, "Biome  " + biome); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Nether Coordinates")) {
             String dimensionId = client.level.dimension().toString();
@@ -308,9 +344,11 @@ public final class AstraHud {
                 drawLine(graphics, client, x, y, 210, "Equivalent XYZ  N/A in this dimension");
             }
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Real Time")) {
             drawLine(graphics, client, x, y, 130, "Real time  " + CLOCK.format(LocalTime.now())); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Facing") || AstraModules.isEnabled("Compass")) {
             String[] points = {"South","South-West","West","North-West","North","North-East","East","South-East"};
@@ -319,22 +357,27 @@ public final class AstraHud {
             if (AstraModules.isEnabled("Facing")) {
                 drawLine(graphics, client, x, y, 150, "Facing  " + points[directionIndex]);
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Compass")) {
                 drawLine(graphics, client, x, y, 130, "Compass  " + abbreviations[directionIndex]);
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
         if (AstraModules.isEnabled("Held Item")) {
             ItemStack held = client.player.getMainHandItem();
             drawLine(graphics, client, x, y, 190, "Held  " + (held.isEmpty() ? "Empty" : held.getHoverName().getString())); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Offhand Item")) {
             ItemStack held = client.player.getOffhandItem();
             drawLine(graphics, client, x, y, 190, "Offhand  " + (held.isEmpty() ? "Empty" : held.getHoverName().getString())); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Rain Status")) {
             drawLine(graphics, client, x, y, 130, "Rain  " + (client.level.isRaining() ? "Yes" : "No")); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Moon Phase")) {
             String[] phases = {"Full moon", "Waning gibbous", "Last quarter", "Waning crescent",
@@ -342,9 +385,11 @@ public final class AstraHud {
             int phase = (int) Math.floorMod(client.level.getDefaultClockTime() / 24000L, 8L);
             drawLine(graphics, client, x, y, 150, "Moon  " + phases[Math.floorMod(phase, phases.length)]);
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Client Version")) {
             drawLine(graphics, client, x, y, 160, "Minecraft  26.2"); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Inventory Status") || AstraModules.isEnabled("Empty Slots")
                 || AstraModules.isEnabled("Totem Counter") || AstraModules.isEnabled("Arrow Counter")
@@ -369,12 +414,18 @@ public final class AstraHud {
                         || item.contains("spider_eye")) food += stack.getCount();
                 
             }
-            if (AstraModules.isEnabled("Inventory Status")) { drawLine(graphics, client, x, y, 170, "Inventory  " + occupied + " / " + (occupied + empty) + " slots used"); y += 24; }
-            if (AstraModules.isEnabled("Empty Slots")) { drawLine(graphics, client, x, y, 155, "Empty slots  " + empty); y += 24; }
-            if (AstraModules.isEnabled("Totem Counter")) { drawLine(graphics, client, x, y, 125, "Totems  " + totems); y += 24; }
-            if (AstraModules.isEnabled("Arrow Counter")) { drawLine(graphics, client, x, y, 125, "Arrows  " + arrows); y += 24; }
-            if (AstraModules.isEnabled("Food Counter")) { drawLine(graphics, client, x, y, 125, "Food items  " + food); y += 24; }
-            if (AstraModules.isEnabled("Potion Counter")) { drawLine(graphics, client, x, y, 125, "Potions  " + potions); y += 24; }
+            if (AstraModules.isEnabled("Inventory Status")) { drawLine(graphics, client, x, y, 170, "Inventory  " + occupied + " / " + (occupied + empty) + " slots used"); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; } }
+            if (AstraModules.isEnabled("Empty Slots")) { drawLine(graphics, client, x, y, 155, "Empty slots  " + empty); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; } }
+            if (AstraModules.isEnabled("Totem Counter")) { drawLine(graphics, client, x, y, 125, "Totems  " + totems); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; } }
+            if (AstraModules.isEnabled("Arrow Counter")) { drawLine(graphics, client, x, y, 125, "Arrows  " + arrows); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; } }
+            if (AstraModules.isEnabled("Food Counter")) { drawLine(graphics, client, x, y, 125, "Food items  " + food); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; } }
+            if (AstraModules.isEnabled("Potion Counter")) { drawLine(graphics, client, x, y, 125, "Potions  " + potions); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; } }
         }
         if (AstraModules.isEnabled("Status Effects") || AstraModules.isEnabled("Potion Timers") || AstraModules.isEnabled("Effect Icons")) {
             var effects = client.player.getActiveEffects();
@@ -390,11 +441,13 @@ public final class AstraHud {
                 }
                 drawLine(graphics, client, x, y, 240, names.toString());
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Effect Icons")) {
                 if (effects.isEmpty()) {
                     drawLine(graphics, client, x, y, 180, "Effect icons  None");
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 } else {
                     for (var effect : effects) {
                         String effectName = effect.getEffect().value().getDisplayName().getString();
@@ -402,13 +455,16 @@ public final class AstraHud {
                         int amplifier = effect.getAmplifier() + 1;
                         int seconds = Math.max(0, effect.getDuration() / 20);
                         int iconColor = effect.getEffect().value().isBeneficial() ? 0xFF477F62 : 0xFF8A5360;
-                        graphics.fill(x, y, x + 20, y + 20, iconColor);
-                        graphics.text(client.font, iconText, x + 7, y + 6, WHITE);
+                        if (x + 214 <= hudContentRight) {
+                            graphics.fill(x, y, x + 20, y + 20, iconColor);
+                            graphics.text(client.font, iconText, x + 7, y + 6, WHITE);
+                        }
                         drawLine(graphics, client, x + 24, y, 190,
                                 effectName + (amplifier > 1 ? " " + amplifier : "") +
                                 "  " + String.format("%d:%02d", seconds / 60, seconds % 60));
                         y += 24;
-                        if (y > client.getWindow().getGuiScaledHeight() - 28) break;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
+                        
                     }
                 }
             }
@@ -416,6 +472,7 @@ public final class AstraHud {
                 if (effects.isEmpty()) {
                     drawLine(graphics, client, x, y, 180, "Potion timers  None");
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 } else {
                     for (var effect : effects) {
                         String name = effect.getEffect().value().getDisplayName().getString();
@@ -423,43 +480,51 @@ public final class AstraHud {
                         String duration = String.format("%d:%02d", seconds / 60, seconds % 60);
                         drawLine(graphics, client, x, y, 210, name + "  " + duration);
                         y += 24;
-                        if (y > client.getWindow().getGuiScaledHeight() - 28) break;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
+                        
                     }
                 }
             }
         }
         if (AstraModules.isEnabled("Sprint Status")) {
             drawLine(graphics, client, x, y, 130, "Sprint status  " + (client.player.isSprinting() ? "ON" : "OFF")); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Difficulty")) {
             drawLine(graphics, client, x, y, 145, "Difficulty  " + client.level.getDifficulty());
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Movement Speed")) {
             double speed = client.player.getDeltaMovement().length() * 20.0;
             drawLine(graphics, client, x, y, 165, String.format("Movement speed  %.2f m/s", speed));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Horizontal Speed")) {
             double speed = client.player.getDeltaMovement().horizontalDistance() * 20.0;
             drawLine(graphics, client, x, y, 165, String.format("Horizontal speed  %.2f m/s", speed));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Vertical Speed")) {
             drawLine(graphics, client, x, y, 140, String.format("Vertical speed  %.2f m/s",
                     client.player.getDeltaMovement().y * 20.0));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Velocity")) {
             var velocity = client.player.getDeltaMovement();
             drawLine(graphics, client, x, y, 190, String.format("Velocity  %.2f / %.2f / %.2f",
                     velocity.x * 20.0, velocity.y * 20.0, velocity.z * 20.0));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Elytra Speed") && client.player.isFallFlying()) {
             drawLine(graphics, client, x, y, 145, String.format("Elytra  %.2f m/s",
                     client.player.getDeltaMovement().horizontalDistance() * 20.0));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (client.player.getVehicle() != null) {
             var vehicle = client.player.getVehicle();
@@ -468,19 +533,23 @@ public final class AstraHud {
             if (AstraModules.isEnabled("Vehicle HUD")) {
                 drawLine(graphics, client, x, y, 190, "Vehicle  " + vehicle.getType().toString());
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Horse Speed") && vehicleType.contains("horse")) {
                 drawLine(graphics, client, x, y, 155, String.format("Horse speed  %.2f m/s", vehicleSpeed));
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Boat Speed") && vehicleType.contains("boat")) {
                 drawLine(graphics, client, x, y, 155, String.format("Boat speed  %.2f m/s", vehicleSpeed));
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Mount Health") && vehicle instanceof net.minecraft.world.entity.LivingEntity living) {
                 drawLine(graphics, client, x, y, 150, String.format("Mount health  %.1f / %.0f",
                         living.getHealth(), living.getMaxHealth()));
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
         if (AstraModules.isEnabled("Health Bar")) {
@@ -489,19 +558,23 @@ public final class AstraHud {
             String bar = "♥ ".repeat(Math.min(current, 20)) + "♡ ".repeat(Math.max(0, Math.min(max, 20) - current));
             drawLine(graphics, client, x, y, 190, "Health  " + bar);
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Game Mode") && client.gameMode != null) {
             drawLine(graphics, client, x, y, 150, "Game mode  " + client.gameMode.getPlayerMode().getName());
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Network Status")) {
             drawLine(graphics, client, x, y, 155, "Network  " +
                     (client.getConnection() == null ? "Offline" : "Connected"));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Dimension ID")) {
             drawLine(graphics, client, x, y, 190, "Dimension ID  " + client.level.dimension().identifier());
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Time Played") || AstraModules.isEnabled("Session Timer")) {
             long elapsed = (System.nanoTime() - SESSION_START_NANOS) / 1_000_000_000L;
@@ -511,34 +584,43 @@ public final class AstraHud {
             drawLine(graphics, client, x, y, 155,
                     "Session  " + String.format("%02d:%02d:%02d", hours, minutes, seconds));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Jump Height")) {
             double height = Double.isNaN(jumpStartY) ? 0.0 : Math.max(0.0, jumpPeakY - jumpStartY);
             drawLine(graphics, client, x, y, 145, String.format("Jump height  %.2f m", height));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("CPS Counter")) {
-            drawPanel(graphics, client, x, y, 150, "CLICKS PER SECOND");
-            graphics.text(client.font, "LMB  " + LEFT_CLICK_TIMES.size(), x + 7, y + 15, WHITE);
-            graphics.text(client.font, "RMB  " + RIGHT_CLICK_TIMES.size(), x + 78, y + 15, WHITE);
+            if (x + 150 <= hudContentRight) {
+                drawPanel(graphics, client, x, y, 150, "CLICKS PER SECOND");
+                graphics.text(client.font, "LMB  " + LEFT_CLICK_TIMES.size(), x + 7, y + 15, WHITE);
+                graphics.text(client.font, "RMB  " + RIGHT_CLICK_TIMES.size(), x + 78, y + 15, WHITE);
+            }
             y += 38;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("FPS Graph")) {
             drawGraph(graphics, x, y, "FPS", FPS_SAMPLES, 240);
             y += 52;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Ping Graph")) {
             drawGraph(graphics, x, y, "PING", PING_SAMPLES, 240);
             y += 52;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Target HUD") && client.hitResult instanceof net.minecraft.world.phys.EntityHitResult entityHit) {
             var target = entityHit.getEntity();
             drawLine(graphics, client, x, y, 220, "Target  " + target.getName().getString());
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             if (target instanceof net.minecraft.world.entity.LivingEntity living) {
                 drawLine(graphics, client, x, y, 190, String.format("Target health  %.1f / %.1f",
                         living.getHealth(), living.getMaxHealth()));
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
         if (AstraModules.isEnabled("Last Damage") && lastDamageNanos > 0L) {
@@ -546,12 +628,14 @@ public final class AstraHud {
             drawLine(graphics, client, x, y, 170, String.format("Last damage  %.1f ( %ds ago )",
                     lastDamageAmount, seconds));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Combat Timer")) {
             long seconds = lastDamageNanos == 0L ? -1L : (now - lastDamageNanos) / 1_000_000_000L;
             drawLine(graphics, client, x, y, 160, seconds < 0 ? "Combat  No recent damage"
                     : "Combat  " + seconds + "s since hit");
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Boss Bar")) {
             var bossEvents = ((dev.crystallmoon.astra.mixin.AstraBossOverlayAccessor)
@@ -559,12 +643,14 @@ public final class AstraHud {
             if (bossEvents.isEmpty()) {
                 drawLine(graphics, client, x, y, 180, "Boss bars  None");
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             } else {
                 for (var boss : bossEvents.values()) {
                     drawLine(graphics, client, x, y, 220, String.format("%s  %.0f%%",
                             boss.getName().getString(), boss.getProgress() * 100.0f));
                     y += 24;
-                    if (y > client.getWindow().getGuiScaledHeight() - 28) break;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
+                    
                 }
             }
         }
@@ -572,28 +658,33 @@ public final class AstraHud {
             drawLine(graphics, client, x, y, 170, estimatedServerTps < 0.0
                     ? "Server TPS  Measuring..." : String.format("Server TPS  %.1f", estimatedServerTps));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Packet Rate")) {
             float packets = client.getConnection() == null ? 0.0f
                     : client.getConnection().getConnection().getAverageReceivedPackets();
             drawLine(graphics, client, x, y, 170, String.format("Packets/s  %.1f", packets));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Server Address")) {
             var server = client.getCurrentServer();
             drawLine(graphics, client, x, y, 210, "Server  " + (server == null ? "Singleplayer" : server.ip));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Server Brand")) {
             String brand = client.getConnection() == null ? null : client.getConnection().serverBrand();
             drawLine(graphics, client, x, y, 210, "Server brand  " + (brand == null || brand.isBlank() ? "Unknown" : brand));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Nearby Players")) {
             int count = (int) client.level.players().stream().filter(player -> player != client.player)
                     .filter(player -> player.distanceToSqr(client.player) <= 64.0 * 64.0).count();
             drawLine(graphics, client, x, y, 155, "Players nearby  " + count);
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Entity Counter") || AstraModules.isEnabled("Mob Counter")
                 || AstraModules.isEnabled("Nearby Entities") || AstraModules.isEnabled("Dropped Items")
@@ -609,6 +700,7 @@ public final class AstraHud {
             }
             if (AstraModules.isEnabled("Entity Counter")) {
                 drawLine(graphics, client, x, y, 150, "Loaded entities  " + entities); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Nearby Entities")) {
                 long nearby = 0;
@@ -616,15 +708,19 @@ public final class AstraHud {
                     if (entity != client.player && entity.distanceToSqr(client.player) <= 32.0 * 32.0) nearby++;
                 }
                 drawLine(graphics, client, x, y, 150, "Nearby entities  " + nearby); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Mob Counter")) {
                 drawLine(graphics, client, x, y, 120, "Living entities  " + mobs); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Dropped Items")) {
                 drawLine(graphics, client, x, y, 120, "Dropped items  " + items); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Projectile Counter")) {
                 drawLine(graphics, client, x, y, 120, "Projectiles  " + projectiles); y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
         if (AstraModules.isEnabled("Target Block") || AstraModules.isEnabled("Looking At")
@@ -634,13 +730,16 @@ public final class AstraHud {
                 var state = client.level.getBlockState(pos);
                 drawLine(graphics, client, x, y, 220, "Looking at  " + state.getBlock().getName().getString());
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 if (AstraModules.isEnabled("Target Block") || AstraModules.isEnabled("Block Info")) {
                     drawLine(graphics, client, x, y, 220, "Block pos  " + pos.toShortString());
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
             } else if (AstraModules.isEnabled("Looking At")) {
                 drawLine(graphics, client, x, y, 150, "Looking at  Nothing");
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
         if (AstraModules.isEnabled("Durability") || AstraModules.isEnabled("Tool Durability")) {
@@ -649,9 +748,11 @@ public final class AstraHud {
                 drawLine(graphics, client, x, y, 180, "Tool durability  "
                         + Math.max(0, tool.getMaxDamage() - tool.getDamageValue()) + " / " + tool.getMaxDamage());
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             } else {
                 drawLine(graphics, client, x, y, 150, "Tool durability  N/A");
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
         if (AstraModules.isEnabled("Armor Durability")) {
@@ -663,6 +764,7 @@ public final class AstraHud {
                         : (armor.getMaxDamage() - armor.getDamageValue()) + " / " + armor.getMaxDamage();
                 drawLine(graphics, client, x, y, 180, "Armor " + label + "  " + value);
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
         if (AstraModules.isEnabled("Hotbar")) {
@@ -693,11 +795,13 @@ public final class AstraHud {
             long players = client.level.players().stream().filter(player -> player != client.player).count();
             drawLine(graphics, client, x, y, 155, "Other players  " + players);
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Coordinates HUD")) {
             drawLine(graphics, client, x, y, 180, String.format("Position  %.1f, %.1f, %.1f",
                     client.player.getX(), client.player.getY(), client.player.getZ()));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Crosshair")) {
             int cx = client.getWindow().getGuiScaledWidth() / 2;
@@ -716,11 +820,13 @@ public final class AstraHud {
                     drawLine(graphics, client, x, y, 190, String.format("Blast resistance  %.1f",
                             state.getBlock().getExplosionResistance()));
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
                 if (AstraModules.isEnabled("Mining Speed")) {
                     drawLine(graphics, client, x, y, 190, String.format("Mining speed  %.2f",
                             client.player.getDestroySpeed(state)));
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
                 if (AstraModules.isEnabled("Breaking Progress")) {
                     boolean attacking = client.options.keyAttack.isDown();
@@ -732,22 +838,26 @@ public final class AstraHud {
                             ? String.format("Breaking progress  %.0f%%", Math.min(100.0f, progress * 100.0f))
                             : "Breaking progress  Start mining");
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
                 if (AstraModules.isEnabled("Harvest Level")) {
                     drawLine(graphics, client, x, y, 190, "Harvest tool  " +
                             (client.player.getMainHandItem().isCorrectToolForDrops(state) ? "Suitable" : "Not suitable"));
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
                 if (AstraModules.isEnabled("Light Overlay")) {
                     int light = client.level.getMaxLocalRawBrightness(pos);
                     drawLine(graphics, client, x, y, 190, "Block light  " + light);
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
             } else if (AstraModules.isEnabled("Mining Speed")
                     || AstraModules.isEnabled("Block Resistance") || AstraModules.isEnabled("Harvest Level")
                     || AstraModules.isEnabled("Light Overlay")) {
                 drawLine(graphics, client, x, y, 190, "Block details  Look at a block");
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
         if (AstraModules.isEnabled("Arrow Trajectory")
@@ -779,11 +889,13 @@ public final class AstraHud {
             drawMeter(graphics, client, x, y, 150, "ATTACK COOLDOWN",
                     client.player.getAttackStrengthScale(0.0f) * 100.0, 100.0, ACCENT);
             y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Armor Points")) {
             drawMetric(graphics, client, x, y, 150, "ARMOR",
                     Integer.toString(client.player.getArmorValue()), client.player.getArmorValue(), 20.0, ACCENT);
             y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Held Item Name") || AstraModules.isEnabled("Held Item Count")) {
             ItemStack heldStack = client.player.getMainHandItem();
@@ -791,10 +903,12 @@ public final class AstraHud {
             if (AstraModules.isEnabled("Held Item Name")) {
                 drawLine(graphics, client, x, y, 210, "Held item  " + heldName);
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Held Item Count")) {
                 drawLine(graphics, client, x, y, 150, "Held count  " + (heldStack.isEmpty() ? 0 : heldStack.getCount()));
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
         if (AstraModules.isEnabled("Offhand Item Name") || AstraModules.isEnabled("Offhand Item Count")) {
@@ -803,10 +917,12 @@ public final class AstraHud {
             if (AstraModules.isEnabled("Offhand Item Name")) {
                 drawLine(graphics, client, x, y, 210, "Offhand  " + offhandName);
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Offhand Item Count")) {
                 drawLine(graphics, client, x, y, 150, "Offhand count  " + (offhandStack.isEmpty() ? 0 : offhandStack.getCount()));
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
         if (AstraModules.isEnabled("Selected Hotbar Slot")) {
@@ -814,6 +930,7 @@ public final class AstraHud {
                     Integer.toString(client.player.getInventory().getSelectedSlot() + 1),
                     client.player.getInventory().getSelectedSlot() + 1, 9.0, ACCENT);
             y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Inventory Used Slots") || AstraModules.isEnabled("Inventory Fill Percentage")) {
             int usedSlots = 0;
@@ -822,11 +939,13 @@ public final class AstraHud {
             if (AstraModules.isEnabled("Inventory Used Slots")) {
                 drawLine(graphics, client, x, y, 160, "Used slots  " + usedSlots + " / " + totalSlots);
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Inventory Fill Percentage")) {
                 drawMeter(graphics, client, x, y, 160, "INVENTORY",
                         usedSlots * 100.0 / Math.max(1, totalSlots), 100.0, ACCENT);
                 y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
         if (AstraModules.isEnabled("Ender Pearl Counter") || AstraModules.isEnabled("Golden Apple Counter")) {
@@ -840,20 +959,24 @@ public final class AstraHud {
             if (AstraModules.isEnabled("Ender Pearl Counter")) {
                 drawLine(graphics, client, x, y, 150, "Ender pearls  " + pearls);
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Golden Apple Counter")) {
                 drawLine(graphics, client, x, y, 150, "Golden apples  " + goldenApples);
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
         }
         if (AstraModules.isEnabled("Chunk Section")) {
             drawLine(graphics, client, x, y, 150, "Chunk section  " + (client.player.blockPosition().getY() >> 4));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Region Coordinates")) {
             var regionPos = client.player.blockPosition();
             drawLine(graphics, client, x, y, 170, "Region  " + (regionPos.getX() >> 9) + ", " + (regionPos.getZ() >> 9));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Target Distance") || AstraModules.isEnabled("Target Coordinates")) {
             if (client.hitResult instanceof net.minecraft.world.phys.EntityHitResult targetHit) {
@@ -862,15 +985,18 @@ public final class AstraHud {
                     drawLine(graphics, client, x, y, 150, String.format("Target distance  %.1f m",
                             targetEntity.distanceTo(client.player)));
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
                 if (AstraModules.isEnabled("Target Coordinates")) {
                     drawLine(graphics, client, x, y, 190, "Target XYZ  " + targetEntity.blockPosition().toShortString());
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
             } else if (client.hitResult instanceof net.minecraft.world.phys.BlockHitResult targetBlock) {
                 if (AstraModules.isEnabled("Target Coordinates")) {
                     drawLine(graphics, client, x, y, 190, "Target XYZ  " + targetBlock.getBlockPos().toShortString());
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
             }
         }
@@ -880,38 +1006,46 @@ public final class AstraHud {
             if (AstraModules.isEnabled("Target Name")) {
                 drawLine(graphics, client, x, y, 190, "Target  " + targetEntity.getName().getString());
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Target Type")) {
                 drawLine(graphics, client, x, y, 190, "Type  " + targetEntity.getType().getDescription().getString());
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (AstraModules.isEnabled("Target Entity ID")) {
                 drawLine(graphics, client, x, y, 150, "Entity ID  " + targetEntity.getId());
                 y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
             if (targetEntity instanceof net.minecraft.world.entity.LivingEntity livingTarget) {
                 if (AstraModules.isEnabled("Target Health")) {
                     drawMeter(graphics, client, x, y, 160, "TARGET HEALTH",
                             livingTarget.getHealth(), livingTarget.getMaxHealth(), 0xFFE45B68);
                     y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
                 if (AstraModules.isEnabled("Target Max Health")) {
                     drawLine(graphics, client, x, y, 160, "Max health  " + String.format("%.1f", livingTarget.getMaxHealth()));
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
                 if (AstraModules.isEnabled("Target Armor")) {
                     drawLine(graphics, client, x, y, 150, "Target armor  " + livingTarget.getArmorValue());
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
                 if (AstraModules.isEnabled("Target Absorption")) {
                     drawLine(graphics, client, x, y, 170, "Absorption  " + String.format("%.1f", livingTarget.getAbsorptionAmount()));
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
                 if (AstraModules.isEnabled("Target Held Item")) {
                     ItemStack targetItem = livingTarget.getMainHandItem();
                     String itemName = targetItem.isEmpty() ? "Empty" : targetItem.getHoverName().getString();
                     drawLine(graphics, client, x, y, 200, "Target item  " + itemName);
                     y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
             }
         }
@@ -920,10 +1054,12 @@ public final class AstraHud {
             drawMetric(graphics, client, x, y, 150, "ALTITUDE",
                     Integer.toString(client.player.getBlockY()), client.player.getBlockY(), 320.0, ACCENT);
             y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Player Name")) {
             drawLine(graphics, client, x, y, 180, "Player  " + client.player.getName().getString());
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Main Hand Durability")) {
             ItemStack mainHand = client.player.getMainHandItem();
@@ -931,6 +1067,7 @@ public final class AstraHud {
                     : Integer.toString(mainHand.getMaxDamage() - mainHand.getDamageValue());
             drawLine(graphics, client, x, y, 170, "Main hand durability  " + remaining);
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Offhand Durability")) {
             ItemStack offhand = client.player.getOffhandItem();
@@ -938,6 +1075,7 @@ public final class AstraHud {
                     : Integer.toString(offhand.getMaxDamage() - offhand.getDamageValue());
             drawLine(graphics, client, x, y, 170, "Offhand durability  " + remaining);
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Total Armor Durability")) {
             int remaining = 0;
@@ -953,51 +1091,66 @@ public final class AstraHud {
             drawMeter(graphics, client, x, y, 160, "ARMOR DURABILITY", remaining,
                     Math.max(1, maximum), 0xFF65D58A);
             y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Player Food Level")) {
             drawMeter(graphics, client, x, y, 150, "FOOD LEVEL",
                     client.player.getFoodData().getFoodLevel(), 20.0, 0xFFE8B64F);
             y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Player Air Supply")) {
             drawMeter(graphics, client, x, y, 150, "AIR SUPPLY",
                     client.player.getAirSupply(), client.player.getMaxAirSupply(), ACCENT);
             y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Player Experience Level")) {
             drawMetric(graphics, client, x, y, 150, "XP LEVEL",
                     Integer.toString(client.player.experienceLevel), client.player.experienceLevel, 100.0, 0xFF70D77C);
             y += 34;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Player Rotation")) {
             drawLine(graphics, client, x, y, 170, String.format("Rotation  %.1f / %.1f",
                     client.player.getYRot(), client.player.getXRot()));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Player Ground Status")) {
             drawLine(graphics, client, x, y, 150, "Grounded  " + (client.player.onGround() ? "Yes" : "No"));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Player Sneaking Status")) {
             drawLine(graphics, client, x, y, 150, "Sneaking  " + (client.player.isShiftKeyDown() ? "Yes" : "No"));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
 
         if (AstraModules.isEnabled("Chunk Updates")) {
             drawLine(graphics, client, x, y, 175, "Chunk updates  " + chunkUpdates);
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
+        }
+        if (x + 240 > hudContentRight) {
+            graphics.text(client.font, "More enabled HUDs exist than fit on this screen.",
+                    Math.max(8, (screenWidth - client.font.width("More enabled HUDs exist than fit on this screen.")) / 2),
+                    8, 0xFFFFD27A);
         }
         if (AstraModules.isEnabled("Spawnable Light")) {
             int light = client.level.getMaxLocalRawBrightness(client.player.blockPosition());
             drawLine(graphics, client, x, y, 165, "Spawn light  " + light + (light < 8 ? "  (hostile spawn risk)" : ""));
             y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
     }
 
 
     private static void drawPanel(GuiGraphicsExtractor graphics, Minecraft client, int x, int y,
             int width, String title) {
-        if (y < -28 || y > client.getWindow().getGuiScaledHeight() - 30) return;
+        if (y < -28 || y > client.getWindow().getGuiScaledHeight() - 30 || x < 0
+                || x + width > hudContentRight) return;
         graphics.fill(x, y, x + width, y + 30, 0xD90B0E14);
         graphics.fill(x, y, x + 2, y + 30, ACCENT);
         graphics.text(client.font, title, x + 7, y + 5, 0xFFB8C7DF);
@@ -1005,6 +1158,7 @@ public final class AstraHud {
 
     private static void drawMetric(GuiGraphicsExtractor graphics, Minecraft client, int x, int y,
             int width, String title, String value, double amount, double max, int color) {
+        if (x < 0 || x + width > hudContentRight) return;
         drawPanel(graphics, client, x, y, width, title);
         graphics.text(client.font, value, x + 7, y + 15, WHITE);
         graphics.fill(x + width - 7, y + 17, x + width - 4, y + 25, 0xFF343A45);
@@ -1014,6 +1168,7 @@ public final class AstraHud {
 
     private static void drawMeter(GuiGraphicsExtractor graphics, Minecraft client, int x, int y,
             int width, String title, double value, double max, int color) {
+        if (x < 0 || x + width > hudContentRight) return;
         drawPanel(graphics, client, x, y, width, title + "  " + String.format("%.1f / %.0f", value, max));
         graphics.fill(x + 7, y + 19, x + width - 7, y + 25, 0xFF343A45);
         int fill = (int)Math.round((width - 14) * Math.max(0.0, Math.min(1.0, value / Math.max(1.0, max))));
@@ -1022,7 +1177,8 @@ public final class AstraHud {
 
 
     private static void drawGraph(GuiGraphicsExtractor graphics, int x, int y, String label, int[] samples, int width) {
-        if (y < -46 || y > Minecraft.getInstance().getWindow().getGuiScaledHeight() - 46) return;
+        if (y < -46 || y > Minecraft.getInstance().getWindow().getGuiScaledHeight() - 46
+                || x < 0 || x + width > hudContentRight) return;
         graphics.fill(x, y, x + width, y + 46, BACKGROUND);
         graphics.text(Minecraft.getInstance().font, label, x + 5, y + 4, WHITE);
         int max = 1;
@@ -1037,7 +1193,8 @@ public final class AstraHud {
     }
 
     private static void drawLine(GuiGraphicsExtractor graphics, Minecraft client, int x, int y, int width, String text) {
-        if (y < -20 || y > client.getWindow().getGuiScaledHeight() - 20) return;
+        if (y < -20 || y > client.getWindow().getGuiScaledHeight() - 20
+                || x < 0 || x + width > hudContentRight) return;
         graphics.fill(x, y, x + width, y + 20, BACKGROUND);
         graphics.fill(x, y, x + 2, y + 20, ACCENT);
         graphics.text(client.font, text, x + 7, y + 6, WHITE);
