@@ -4,6 +4,6 @@
   "compatibilityLevel": "JAVA_21",
   "client": ["AstraBossOverlayAccessor",
     "AstraGameModeAccessor",
-    "AstraServerTimeMixin"],
+    "AstraServerTimeMixin", "AstraCrosshairMixin"],
   "injectors": {"defaultRequire": 1}
 }
