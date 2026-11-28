@@ -1016,7 +1016,7 @@ public final class AstraHud {
                 }
             } else if (client.hitResult instanceof net.minecraft.world.phys.BlockHitResult targetBlock) {
                 if (AstraModules.isEnabled("Target Distance")) {
-                    double distance = client.player.distanceTo(targetBlock.getBlockPos().getCenter());
+                    double distance = client.player.distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(targetBlock.getBlockPos()));
                     drawLine(graphics, client, x, y, 150, String.format("Target distance  %.1f m", distance));
                     y += 24;
                     if (y + 46 > layoutBottom) { y = 8; x += 250; }
