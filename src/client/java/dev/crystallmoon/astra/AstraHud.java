@@ -933,13 +933,21 @@ public final class AstraHud {
                 && (client.player.getMainHandItem().getItem() instanceof net.minecraft.world.item.BowItem
                 || client.player.getMainHandItem().getItem() instanceof net.minecraft.world.item.CrossbowItem)) {
             var forward = client.player.getViewVector(1.0f);
-            var right = forward.cross(new net.minecraft.world.phys.Vec3(0.0, 1.0, 0.0)).normalize();
+            var right = forward.cross(new net.minecraft.world.phys.Vec3(0.0, 1.0, 0.0));
+            if (right.lengthSqr() < 1.0E-6) right = new net.minecraft.world.phys.Vec3(1.0, 0.0, 0.0);
+            else right = right.normalize();
             var up = right.cross(forward).normalize();
             var position = client.player.getEyePosition().add(forward.scale(0.15));
             var velocity = forward.scale(3.0);
             double focal = screenHeight * 0.5 / Math.tan(Math.toRadians(35.0));
             for (int step = 0; step < 40; step++) {
+                var previousPosition = position;
                 position = position.add(velocity);
+                var collision = client.level.clip(new net.minecraft.world.level.ClipContext(previousPosition, position,
+                        net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                        net.minecraft.world.level.ClipContext.Fluid.NONE, client.player));
+                boolean hitBlock = collision.getType() != net.minecraft.world.phys.HitResult.Type.MISS;
+                if (hitBlock) position = collision.getLocation();
                 velocity = velocity.scale(0.99).add(0.0, -0.05, 0.0);
                 var relative = position.subtract(client.player.getEyePosition());
                 double depth = relative.dot(forward);
@@ -949,6 +957,7 @@ public final class AstraHud {
                 if (px >= 2 && px < screenWidth - 2 && py >= 2 && py < screenHeight - 2) {
                     graphics.fill(px - 1, py - 1, px + 2, py + 2, ACCENT);
                 }
+                if (hitBlock) break;
             }
         }
 
