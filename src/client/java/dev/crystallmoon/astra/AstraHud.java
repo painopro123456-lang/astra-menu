@@ -554,12 +554,16 @@ public final class AstraHud {
                 y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
-            if (AstraModules.isEnabled("Horse Speed") && vehicleType.contains("horse")) {
+            boolean horseLike = vehicleType.contains("horse") || vehicleType.contains("donkey")
+                    || vehicleType.contains("mule") || vehicleType.contains("camel")
+                    || vehicleType.contains("llama");
+            if (AstraModules.isEnabled("Horse Speed") && horseLike) {
                 drawLine(graphics, client, x, y, 155, String.format("Horse speed  %.2f m/s", vehicleSpeed));
                 y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
-            if (AstraModules.isEnabled("Boat Speed") && vehicleType.contains("boat")) {
+            if (AstraModules.isEnabled("Boat Speed")
+                    && (vehicleType.contains("boat") || vehicleType.contains("raft"))) {
                 drawLine(graphics, client, x, y, 155, String.format("Boat speed  %.2f m/s", vehicleSpeed));
                 y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
@@ -662,7 +666,7 @@ public final class AstraHud {
         if (AstraModules.isEnabled("Combat Timer")) {
             long seconds = lastDamageNanos == 0L ? -1L : (now - lastDamageNanos) / 1_000_000_000L;
             drawLine(graphics, client, x, y, 160, seconds < 0 ? "Combat  No recent damage"
-                    : "Combat  " + seconds + "s since hit");
+                    : "Combat  " + seconds + "s since damage");
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
@@ -870,9 +874,11 @@ public final class AstraHud {
                     float progress = breaking.astra$isDestroying()
                             && breaking.astra$getDestroyBlockPos().equals(pos)
                             ? breaking.astra$getDestroyProgress() : 0.0f;
-                    drawLine(graphics, client, x, y, 190, attacking && breaking.astra$isDestroying()
+                    String progressText = breaking.astra$isDestroying()
+                            && breaking.astra$getDestroyBlockPos().equals(pos)
                             ? String.format("Breaking progress  %.0f%%", Math.min(100.0f, progress * 100.0f))
-                            : "Breaking progress  Start mining");
+                            : attacking ? "Breaking progress  Waiting for block" : "Breaking progress  Not mining";
+                    drawLine(graphics, client, x, y, 210, progressText);
                     y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
