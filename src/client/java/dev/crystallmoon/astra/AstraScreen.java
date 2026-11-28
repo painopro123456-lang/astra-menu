@@ -14,7 +14,8 @@ public final class AstraScreen extends Screen {
     private static final int WHITE = 0xFFF4F7FC;
     private static final int MUTED = 0xFF9AA7B8;
     private static final String[] CATEGORIES = {"All", "HUD", "Player", "World", "Items", "Visual", "Utility"};
-    private static final int PAGE_SIZE = 12;
+    private static final int ROW_STEP = 46;
+    private static final int BUTTON_HEIGHT = 34;
 
     private String category = "All";
     private int page;
@@ -23,34 +24,57 @@ public final class AstraScreen extends Screen {
         super(Component.literal("Astra Menu"));
     }
 
+    private int panelWidth() { return Math.max(0, Math.min(900, width - 24)); }
+    private int panelHeight() { return Math.max(0, Math.min(520, height - 24)); }
+    private int panelLeft() { return (width - panelWidth()) / 2; }
+    private int panelTop() { return (height - panelHeight()) / 2; }
+    private int sidebarWidth() { return Math.min(174, Math.max(118, panelWidth() / 5)); }
+    private int contentLeft() { return panelLeft() + sidebarWidth() + 16; }
+    private int contentWidth() { return Math.max(1, panelLeft() + panelWidth() - contentLeft() - 16); }
+    private int columns() { return contentWidth() >= 610 ? 2 : 1; }
+    private int rowsPerPage() {
+        int gridTop = panelTop() + 158;
+        int gridBottom = panelTop() + panelHeight() - 62;
+        return Math.max(1, (gridBottom - gridTop + 8) / ROW_STEP);
+    }
+    private int pageSize() { return rowsPerPage() * columns(); }
+
     @Override
     protected void init() {
         clearWidgets();
-        int left = Math.max(12, (width - 900) / 2);
-        int top = Math.max(12, (height - 520) / 2);
+        int left = panelLeft();
+        int top = panelTop();
+        int side = sidebarWidth();
+        int contentX = contentLeft();
+        int colCount = columns();
+        int colGap = colCount == 2 ? 12 : 0;
+        int buttonWidth = Math.max(1, (contentWidth() - colGap) / colCount);
 
         for (int i = 0; i < CATEGORIES.length; i++) {
             String name = CATEGORIES[i];
-            int y = top + 112 + i * 39;
+            int y = top + 105 + i * 34;
             addRenderableWidget(Button.builder(
                     Component.literal((category.equals(name) ? "◆  " : "   ") + name), button -> {
                         category = name;
                         page = 0;
                         init();
-                    }).bounds(left + 18, y, 145, 31).build());
+                    }).bounds(left + 12, y, Math.max(1, side - 24), 28).build());
         }
 
         List<String> modules = filteredModules();
-        int pages = Math.max(1, (modules.size() + PAGE_SIZE - 1) / PAGE_SIZE);
+        int pageSize = pageSize();
+        int pages = Math.max(1, (modules.size() + pageSize - 1) / pageSize);
         page = Math.max(0, Math.min(page, pages - 1));
 
-        for (int i = page * PAGE_SIZE; i < Math.min(modules.size(), (page + 1) * PAGE_SIZE); i++) {
+        int start = page * pageSize;
+        int end = Math.min(modules.size(), start + pageSize);
+        for (int i = start; i < end; i++) {
             String name = modules.get(i);
-            int local = i - page * PAGE_SIZE;
-            int col = local % 2;
-            int row = local / 2;
-            int x = left + 190 + col * 330;
-            int y = top + 157 + row * 55;
+            int local = i - start;
+            int col = local % colCount;
+            int row = local / colCount;
+            int x = contentX + col * (buttonWidth + colGap);
+            int y = top + 158 + row * ROW_STEP;
             boolean enabled = AstraModules.isEnabled(name);
 
             addRenderableWidget(Button.builder(
@@ -58,17 +82,18 @@ public final class AstraScreen extends Screen {
                         AstraModules.toggle(name);
                         button.setMessage(Component.literal(
                                 (AstraModules.isEnabled(name) ? "●  " : "○  ") + name));
-                    }).bounds(x, y, 310, 38).build());
+                    }).bounds(x, y, buttonWidth, BUTTON_HEIGHT).build());
         }
 
+        int navY = top + panelHeight() - 46;
         addRenderableWidget(Button.builder(Component.literal("‹"), button -> {
-            page--;
+            page = Math.max(0, page - 1);
             init();
-        }).bounds(left + 190, top + 455, 38, 28).build());
+        }).bounds(contentX, navY, 34, 26).build());
         addRenderableWidget(Button.builder(Component.literal("›"), button -> {
-            page++;
+            page = Math.min(pages - 1, page + 1);
             init();
-        }).bounds(left + 236, top + 455, 38, 28).build());
+        }).bounds(contentX + 40, navY, 34, 26).build());
     }
 
     private List<String> filteredModules() {
@@ -120,39 +145,42 @@ public final class AstraScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        int left = Math.max(12, (width - 900) / 2);
-        int top = Math.max(12, (height - 520) / 2);
-        int right = Math.min(width - 12, left + 900);
-        int bottom = Math.min(height - 12, top + 520);
+        int left = panelLeft();
+        int top = panelTop();
+        int right = left + panelWidth();
+        int bottom = top + panelHeight();
+        int side = sidebarWidth();
 
         graphics.fill(0, 0, width, height, 0xA9000000);
         graphics.fill(left, top, right, bottom, BG);
-        graphics.fill(left, top, right, top + 82, PANEL);
-        graphics.fill(left, top + 82, left + 174, bottom, PANEL);
+        graphics.fill(left, top, right, top + Math.min(82, panelHeight()), PANEL);
+        graphics.fill(left, top + Math.min(82, panelHeight()), left + side, bottom, PANEL);
         graphics.fill(left, top + 81, right, top + 83, ACCENT);
-        graphics.fill(left + 173, top + 82, left + 175, bottom, 0x553F526B);
+        graphics.fill(left + side - 1, top + 82, left + side + 1, bottom, 0x553F526B);
 
-        graphics.text(font, "ASTRA", left + 22, top + 18, WHITE);
-        graphics.text(font, "CLIENT", left + 91, top + 21, ACCENT);
-        graphics.text(font, "Useful tools. No filler modules.", left + 22, top + 48, MUTED);
-        graphics.text(font, "RIGHT SHIFT  /  CLOSE", right - 172, top + 24, MUTED);
-        graphics.text(font, "LIBRARY", left + 22, top + 97, MUTED);
+        graphics.text(font, "ASTRA", left + 18, top + 16, WHITE);
+        graphics.text(font, "CLIENT", left + 87, top + 19, ACCENT);
+        graphics.text(font, "Useful tools. No filler modules.", left + 18, top + 45, MUTED);
+        graphics.text(font, "RIGHT SHIFT  /  CLOSE", Math.max(left + 180, right - 172), top + 22, MUTED);
+        graphics.text(font, "LIBRARY", left + 18, top + 91, MUTED);
 
         int enabled = 0;
         for (boolean state : AstraModules.all().values()) if (state) enabled++;
-        graphics.text(font, "MODULE LIBRARY", left + 190, top + 94, WHITE);
+        graphics.text(font, "MODULE LIBRARY", contentLeft(), top + 91, WHITE);
         graphics.text(font, enabled + " ENABLED  ·  " + AstraModules.all().size() + " AVAILABLE",
-                right - 255, top + 94, ACCENT);
+                Math.max(contentLeft(), right - 255), top + 91, ACCENT);
 
         List<String> modules = filteredModules();
-        int pages = Math.max(1, (modules.size() + PAGE_SIZE - 1) / PAGE_SIZE);
+        int pages = Math.max(1, (modules.size() + pageSize() - 1) / pageSize());
         graphics.text(font, category + "  /  " + modules.size() + " MODULES",
-                left + 190, top + 119, WHITE);
-        graphics.text(font, "Tap a module to turn it on or off. Settings save automatically.",
-                left + 190, top + 137, MUTED);
-        graphics.text(font, "PAGE " + (page + 1) + " OF " + pages, left + 190, bottom - 42, MUTED);
-        graphics.text(font, "ASTRA  •  BUILT FOR YOUR CLIENT", left + 22, bottom - 24, MUTED);
-        graphics.text(font, AstraModules.all().size() + " MODULES REGISTERED", right - 222, bottom - 24, MUTED);
+                contentLeft(), top + 116, WHITE);
+        graphics.text(font, "Select a module to toggle it. Your choices save automatically.",
+                contentLeft(), top + 136, MUTED);
+        graphics.text(font, "PAGE " + (page + 1) + " OF " + pages,
+                contentLeft() + 84, bottom - 37, MUTED);
+        graphics.text(font, "ASTRA  •  BUILT FOR YOUR CLIENT", left + 18, bottom - 18, MUTED);
+        graphics.text(font, AstraModules.all().size() + " MODULES REGISTERED",
+                Math.max(contentLeft(), right - 222), bottom - 18, MUTED);
 
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
