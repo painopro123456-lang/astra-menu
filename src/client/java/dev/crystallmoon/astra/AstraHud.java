@@ -892,8 +892,6 @@ public final class AstraHud {
             var up = right.cross(forward).normalize();
             var position = client.player.getEyePosition().add(forward.scale(0.15));
             var velocity = forward.scale(3.0);
-            int screenWidth = client.getWindow().getGuiScaledWidth();
-            int screenHeight = client.getWindow().getGuiScaledHeight();
             double focal = screenHeight * 0.5 / Math.tan(Math.toRadians(35.0));
             for (int step = 0; step < 40; step++) {
                 position = position.add(velocity);
