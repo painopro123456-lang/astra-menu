@@ -198,7 +198,7 @@ public final class AstraHud {
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Dimension")) {
-            drawLine(graphics, client, x, y, 180, "Dimension  " + client.level.dimension().toString());
+            drawLine(graphics, client, x, y, 180, "Dimension  " + client.level.dimension().identifier().toString());
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
@@ -552,10 +552,11 @@ public final class AstraHud {
         }
         if (client.player.getVehicle() != null) {
             var vehicle = client.player.getVehicle();
-            String vehicleType = vehicle.getType().toString().toLowerCase(java.util.Locale.ROOT);
+            String vehicleType = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE
+                    .getKey(vehicle.getType()).getPath().toLowerCase(java.util.Locale.ROOT);
             double vehicleSpeed = vehicle.getDeltaMovement().horizontalDistance() * 20.0;
             if (AstraModules.isEnabled("Vehicle HUD")) {
-                drawLine(graphics, client, x, y, 190, "Vehicle  " + vehicle.getType().toString());
+                drawLine(graphics, client, x, y, 190, "Vehicle  " + vehicleType.replace('_', ' '));
                 y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
             }
