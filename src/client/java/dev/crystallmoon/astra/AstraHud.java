@@ -837,13 +837,13 @@ public final class AstraHud {
             int hotbarX = (screenWidth - 182) / 2;
             int hotbarY = screenHeight - 22;
             // Cover the vanilla bar completely, then redraw the nine real slots.
-            graphics.fill(hotbarX, hotbarY, hotbarX + 182, hotbarY + 22, BACKGROUND);
+            graphics.fill(hotbarX, hotbarY, hotbarX + 182, hotbarY + 22, 0xFF0D1016);
             for (int i = 0; i < 9; i++) {
                 int slotX = hotbarX + 1 + i * 20;
                 ItemStack stack = client.player.getInventory().getItem(i);
                 boolean selected = i == client.player.getInventory().getSelectedSlot();
                 graphics.fill(slotX, hotbarY + 1, slotX + 20, hotbarY + 21,
-                        selected ? 0xFF526D91 : 0xBB10141C);
+                        selected ? 0xFF526D91 : 0xFF171B22);
                 if (selected) {
                     graphics.fill(slotX, hotbarY + 1, slotX + 20, hotbarY + 2, ACCENT);
                     graphics.fill(slotX, hotbarY + 20, slotX + 20, hotbarY + 21, ACCENT);
