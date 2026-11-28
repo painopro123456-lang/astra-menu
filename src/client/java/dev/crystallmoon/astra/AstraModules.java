@@ -148,6 +148,14 @@ public final class AstraModules {
         add("Player Rotation", false); // HUD / utility
         add("Player Ground Status", false); // HUD / utility
         add("Player Sneaking Status", false); // HUD / utility
+        add("Target Health", false); // Visual / target HUD
+        add("Target Max Health", false); // Visual / target HUD
+        add("Target Armor", false); // Visual / target HUD
+        add("Target Absorption", false); // Visual / target HUD
+        add("Target Name", false); // Visual / target HUD
+        add("Target Type", false); // Visual / target HUD
+        add("Target Entity ID", false); // Visual / target HUD
+        add("Target Held Item", false); // Visual / target HUD
     }
 
     private AstraModules() {}
