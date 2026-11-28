@@ -1179,9 +1179,9 @@ public final class AstraHud {
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Spawnable Light")) {
-            int light = client.level.getBrightness(LightLayer.BLOCK, client.player.blockPosition());
-            drawLine(graphics, client, x, y, 190, "Block light  " + light
-                    + (light == 0 ? "  (hostile mobs can spawn)" : ""));
+            int light = client.level.getMaxLocalRawBrightness(client.player.blockPosition());
+            drawLine(graphics, client, x, y, 210, "Local light  " + light
+                    + (light == 0 ? "  (hostile mobs may spawn)" : ""));
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
