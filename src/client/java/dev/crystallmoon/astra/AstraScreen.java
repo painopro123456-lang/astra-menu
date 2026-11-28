@@ -30,10 +30,10 @@ public final class AstraScreen extends Screen {
     private int panelTop() { return (height - panelHeight()) / 2; }
     private int sidebarWidth() { return Math.min(174, Math.max(104, panelWidth() / 5)); }
     private int categoryStep() {
-        int available = Math.max(CATEGORIES.length * 22, panelHeight() - 112);
+        int available = Math.max(CATEGORIES.length * 12, panelHeight() - 100);
         return Math.min(34, available / CATEGORIES.length);
     }
-    private int categoryButtonHeight() { return Math.max(18, Math.min(28, categoryStep() - 4)); }
+    private int categoryButtonHeight() { return Math.max(10, Math.min(28, categoryStep() - 2)); }
     private int contentLeft() { return panelLeft() + sidebarWidth() + 16; }
     private int contentWidth() { return Math.max(1, panelLeft() + panelWidth() - contentLeft() - 16); }
     private int columns() { return contentWidth() >= 610 ? 2 : 1; }
