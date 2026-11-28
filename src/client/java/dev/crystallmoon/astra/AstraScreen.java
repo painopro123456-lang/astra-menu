@@ -175,7 +175,7 @@ public final class AstraScreen extends Screen {
         } else {
             graphics.text(font, "RIGHT SHIFT TO CLOSE", Math.max(left + 130, right - 142), top + 22, MUTED);
         }
-        graphics.text(font, "LIBRARY", left + 14, top + 91, MUTED);
+        if (!compactLayout()) graphics.text(font, "LIBRARY", left + 14, top + 91, MUTED);
 
         int enabled = 0;
         for (boolean state : AstraModules.all().values()) if (state) enabled++;
