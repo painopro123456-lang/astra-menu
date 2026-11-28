@@ -37,6 +37,8 @@ public final class AstraHud {
     private static long lastServerTimeNanos;
     private static double estimatedServerTps = -1.0;
     private static UUID trackedPlayerId;
+    private static Object trackedLevel;
+    private static long worldSessionStartNanos;
     private static int hudContentRight;
 
     public static void noteServerTime(long gameTime) {
@@ -57,6 +59,7 @@ public final class AstraHud {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null || client.level == null) return;
 
+        long now = System.nanoTime();
         UUID currentPlayerId = client.player.getUUID();
         if (!currentPlayerId.equals(trackedPlayerId)) {
             trackedPlayerId = currentPlayerId;
@@ -70,6 +73,15 @@ public final class AstraHud {
             LEFT_CLICK_TIMES.clear();
             RIGHT_CLICK_TIMES.clear();
         }
+        if (client.level != trackedLevel) {
+            trackedLevel = client.level;
+            worldSessionStartNanos = now;
+            previousHealth = -1.0f;
+            lastDamageAmount = 0.0f;
+            lastDamageNanos = 0L;
+            jumpStartY = Double.NaN;
+            jumpPeakY = Double.NaN;
+        }
 
         if (client.player.onGround()) {
             jumpStartY = client.player.getY();
@@ -78,7 +90,6 @@ public final class AstraHud {
             jumpPeakY = Math.max(jumpPeakY, client.player.getY());
         }
 
-        long now = System.nanoTime();
         float currentHealth = client.player.getHealth();
         if (previousHealth >= 0.0f && currentHealth < previousHealth) {
             lastDamageAmount = previousHealth - currentHealth;
@@ -574,13 +585,23 @@ public final class AstraHud {
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
-        if (AstraModules.isEnabled("Time Played") || AstraModules.isEnabled("Session Timer")) {
-            long elapsed = (System.nanoTime() - SESSION_START_NANOS) / 1_000_000_000L;
+        if (AstraModules.isEnabled("Time Played")) {
+            long elapsed = Math.max(0L, (now - worldSessionStartNanos) / 1_000_000_000L);
             long hours = elapsed / 3600;
             long minutes = (elapsed % 3600) / 60;
             long seconds = elapsed % 60;
-            drawLine(graphics, client, x, y, 155,
-                    "Session  " + String.format("%02d:%02d:%02d", hours, minutes, seconds));
+            drawLine(graphics, client, x, y, 170,
+                    "World session  " + String.format("%02d:%02d:%02d", hours, minutes, seconds));
+            y += 24;
+            if (y + 46 > layoutBottom) { y = 8; x += 250; }
+        }
+        if (AstraModules.isEnabled("Session Timer")) {
+            long elapsed = Math.max(0L, (now - SESSION_START_NANOS) / 1_000_000_000L);
+            long hours = elapsed / 3600;
+            long minutes = (elapsed % 3600) / 60;
+            long seconds = elapsed % 60;
+            drawLine(graphics, client, x, y, 170,
+                    "Client session  " + String.format("%02d:%02d:%02d", hours, minutes, seconds));
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
