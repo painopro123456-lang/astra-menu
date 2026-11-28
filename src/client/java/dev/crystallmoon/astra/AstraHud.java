@@ -45,7 +45,10 @@ public final class AstraHud {
 
     public static void noteServerTime(long gameTime) {
         long now = System.nanoTime();
-        if (lastServerGameTime >= 0L && gameTime > lastServerGameTime && lastServerTimeNanos > 0L) {
+        if (lastServerGameTime >= 0L && gameTime <= lastServerGameTime) {
+            // A reset or paused clock must not leave the previous server's TPS on screen.
+            estimatedServerTps = -1.0;
+        } else if (lastServerGameTime >= 0L && lastServerTimeNanos > 0L) {
             double elapsed = (now - lastServerTimeNanos) / 1_000_000_000.0;
             if (elapsed > 0.0) estimatedServerTps = Math.min(20.0, (gameTime - lastServerGameTime) / elapsed);
         }
