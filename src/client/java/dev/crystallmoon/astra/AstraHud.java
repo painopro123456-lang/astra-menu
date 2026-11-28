@@ -55,6 +55,11 @@ public final class AstraHud {
 
     private AstraHud() {}
 
+    private static long worldClockTime(Minecraft client) {
+        return client.level.dimensionType().defaultClock().isPresent()
+                ? client.level.getDefaultClockTime() : client.level.getOverworldClockTime();
+    }
+
     public static void noteChunkUpdate() { chunkUpdates++; }
 
     public static void extract(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
@@ -185,7 +190,7 @@ public final class AstraHud {
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("World Time")) {
-            long ticks = Math.floorMod(client.level.getDefaultClockTime(), 24000L);
+            long ticks = Math.floorMod(worldClockTime(client), 24000L);
             long hours = (ticks / 1000 + 6) % 24;
             long minutes = (ticks % 1000) * 60 / 1000;
             drawLine(graphics, client, x, y, 145, String.format("World  %02d:%02d", hours, minutes));
@@ -322,7 +327,7 @@ public final class AstraHud {
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Day Counter") || AstraModules.isEnabled("World Age")) {
-            long dayTime = client.level.getDefaultClockTime();
+            long dayTime = worldClockTime(client);
             long worldAge = client.level.getLevelData().getGameTime();
             if (AstraModules.isEnabled("Day Counter")) {
                 drawLine(graphics, client, x, y, 120, "Day  " + (dayTime / 24000L + 1));
@@ -401,7 +406,7 @@ public final class AstraHud {
         if (AstraModules.isEnabled("Moon Phase")) {
             String[] phases = {"Full moon", "Waning gibbous", "Last quarter", "Waning crescent",
                     "New moon", "Waxing crescent", "First quarter", "Waxing gibbous"};
-            int phase = (int) Math.floorMod(client.level.getDefaultClockTime() / 24000L, 8L);
+            int phase = (int) Math.floorMod(worldClockTime(client) / 24000L, 8L);
             drawLine(graphics, client, x, y, 150, "Moon  " + phases[Math.floorMod(phase, phases.length)]);
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
