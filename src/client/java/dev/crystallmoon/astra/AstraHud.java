@@ -3,6 +3,7 @@ package dev.crystallmoon.astra;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.UUID;
 
@@ -104,6 +105,14 @@ public final class AstraHud {
             lastDamageNanos = 0L;
             jumpStartY = Double.NaN;
             jumpPeakY = Double.NaN;
+            lastServerGameTime = -1L;
+            lastServerTimeNanos = 0L;
+            estimatedServerTps = -1.0;
+            chunkUpdates = 0;
+            graphIndex = 0;
+            lastGraphSample = 0L;
+            Arrays.fill(FPS_SAMPLES, 0);
+            Arrays.fill(PING_SAMPLES, 0);
         }
 
         if (client.player.onGround()) {
