@@ -41,6 +41,7 @@ public final class AstraHud {
     private static Object trackedLevel;
     private static long worldSessionStartNanos;
     private static int hudContentRight;
+    private static boolean hudOverflow;
 
     public static void noteServerTime(long gameTime) {
         long now = System.nanoTime();
@@ -118,6 +119,7 @@ public final class AstraHud {
         int screenWidth = client.getWindow().getGuiScaledWidth();
         int screenHeight = client.getWindow().getGuiScaledHeight();
         hudContentRight = screenWidth - (AstraModules.isEnabled("Keystrokes") ? 170 : 8);
+        hudOverflow = false;
         int layoutBottom = screenHeight - (AstraModules.isEnabled("Armor Status") ? 64 : 8)
                 - (AstraModules.isEnabled("Hotbar") ? 30 : 0);
         int x = 8;
@@ -127,7 +129,7 @@ public final class AstraHud {
                 drawPanel(graphics, client, x, y, 190, "POSITION");
                 graphics.text(client.font, String.format("X %.1f   Y %.1f   Z %.1f",
                         client.player.getX(), client.player.getY(), client.player.getZ()), x + 7, y + 15, WHITE);
-            }
+            } else hudOverflow = true;
             y += 38;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
@@ -171,7 +173,7 @@ public final class AstraHud {
                 graphics.fill(x + 7, y + 17, x + 143, y + 24, 0xFF343A45);
                 graphics.fill(x + 7, y + 17, x + 7 + Math.round(136 * client.player.experienceProgress),
                         y + 24, 0xFF70D77C);
-            }
+            } else hudOverflow = true;
             y += 34;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
@@ -378,7 +380,7 @@ public final class AstraHud {
                 if (!held.isEmpty()) graphics.item(held, x + 2, y + 2);
                 drawLine(graphics, client, x + 24, y, 190,
                         "Held  " + (held.isEmpty() ? "Empty" : held.getHoverName().getString()));
-            }
+            } else hudOverflow = true;
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
@@ -388,7 +390,7 @@ public final class AstraHud {
                 if (!held.isEmpty()) graphics.item(held, x + 2, y + 2);
                 drawLine(graphics, client, x + 24, y, 190,
                         "Offhand  " + (held.isEmpty() ? "Empty" : held.getHoverName().getString()));
-            }
+            } else hudOverflow = true;
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
@@ -475,7 +477,7 @@ public final class AstraHud {
                         if (x + 214 <= hudContentRight) {
                             graphics.fill(x, y, x + 20, y + 20, iconColor);
                             graphics.text(client.font, iconText, x + 7, y + 6, WHITE);
-                        }
+                        } else hudOverflow = true;
                         drawLine(graphics, client, x + 24, y, 190,
                                 effectName + (amplifier > 1 ? " " + amplifier : "") +
                                 "  " + String.format("%d:%02d", seconds / 60, seconds % 60));
@@ -624,7 +626,7 @@ public final class AstraHud {
                 drawPanel(graphics, client, x, y, 150, "CLICKS PER SECOND");
                 graphics.text(client.font, "LMB  " + LEFT_CLICK_TIMES.size(), x + 7, y + 15, WHITE);
                 graphics.text(client.font, "RMB  " + RIGHT_CLICK_TIMES.size(), x + 78, y + 15, WHITE);
-            }
+            } else hudOverflow = true;
             y += 38;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
@@ -1183,13 +1185,20 @@ public final class AstraHud {
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
+        if (hudOverflow) {
+            String message = "Some enabled HUDs are hidden - widen the window or disable modules.";
+            int textX = Math.max(8, (screenWidth - client.font.width(message)) / 2);
+            graphics.fill(textX - 4, screenHeight - 46, textX + client.font.width(message) + 4,
+                    screenHeight - 28, BACKGROUND);
+            graphics.text(client.font, message, textX, screenHeight - 42, 0xFFFFD27A);
+        }
     }
 
 
     private static void drawPanel(GuiGraphicsExtractor graphics, Minecraft client, int x, int y,
             int width, String title) {
-        if (y < -28 || y > client.getWindow().getGuiScaledHeight() - 30 || x < 0
-                || x + width > hudContentRight) return;
+        if (x < 0 || x + width > hudContentRight) { hudOverflow = true; return; }
+        if (y < -28 || y > client.getWindow().getGuiScaledHeight() - 30) return;
         graphics.fill(x, y, x + width, y + 30, 0xD90B0E14);
         graphics.fill(x, y, x + 2, y + 30, ACCENT);
         graphics.text(client.font, title, x + 7, y + 5, 0xFFB8C7DF);
@@ -1197,7 +1206,7 @@ public final class AstraHud {
 
     private static void drawMetric(GuiGraphicsExtractor graphics, Minecraft client, int x, int y,
             int width, String title, String value, double amount, double max, int color) {
-        if (x < 0 || x + width > hudContentRight) return;
+        if (x < 0 || x + width > hudContentRight) { hudOverflow = true; return; }
         drawPanel(graphics, client, x, y, width, title);
         graphics.text(client.font, value, x + 7, y + 15, WHITE);
         graphics.fill(x + width - 7, y + 17, x + width - 4, y + 25, 0xFF343A45);
@@ -1207,7 +1216,7 @@ public final class AstraHud {
 
     private static void drawMeter(GuiGraphicsExtractor graphics, Minecraft client, int x, int y,
             int width, String title, double value, double max, int color) {
-        if (x < 0 || x + width > hudContentRight) return;
+        if (x < 0 || x + width > hudContentRight) { hudOverflow = true; return; }
         drawPanel(graphics, client, x, y, width, title + "  " + String.format("%.1f / %.0f", value, max));
         graphics.fill(x + 7, y + 19, x + width - 7, y + 25, 0xFF343A45);
         int fill = (int)Math.round((width - 14) * Math.max(0.0, Math.min(1.0, value / Math.max(1.0, max))));
@@ -1217,7 +1226,7 @@ public final class AstraHud {
 
     private static void drawGraph(GuiGraphicsExtractor graphics, int x, int y, String label, int[] samples, int width) {
         if (y < -46 || y > Minecraft.getInstance().getWindow().getGuiScaledHeight() - 46
-                || x < 0 || x + width > hudContentRight) return;
+                || x < 0 || x + width > hudContentRight) { hudOverflow = true; return; }
         graphics.fill(x, y, x + width, y + 46, BACKGROUND);
         graphics.text(Minecraft.getInstance().font, label, x + 5, y + 4, WHITE);
         int max = 1;
@@ -1233,7 +1242,7 @@ public final class AstraHud {
 
     private static void drawLine(GuiGraphicsExtractor graphics, Minecraft client, int x, int y, int width, String text) {
         if (y < -20 || y > client.getWindow().getGuiScaledHeight() - 20
-                || x < 0 || x + width > hudContentRight) return;
+                || x < 0 || x + width > hudContentRight) { hudOverflow = true; return; }
         graphics.fill(x, y, x + width, y + 20, BACKGROUND);
         graphics.fill(x, y, x + 2, y + 20, ACCENT);
         graphics.text(client.font, text, x + 7, y + 6, WHITE);
