@@ -820,6 +820,48 @@ public final class AstraHud {
                 }
             }
         }
+        boolean targetDetailsEnabled = AstraModules.isEnabled("Target Health") || AstraModules.isEnabled("Target Max Health") || AstraModules.isEnabled("Target Armor") || AstraModules.isEnabled("Target Absorption") || AstraModules.isEnabled("Target Name") || AstraModules.isEnabled("Target Type") || AstraModules.isEnabled("Target Entity ID") || AstraModules.isEnabled("Target Held Item");
+        if (targetDetailsEnabled && client.hitResult instanceof net.minecraft.world.phys.EntityHitResult targetHit) {
+            var targetEntity = targetHit.getEntity();
+            if (AstraModules.isEnabled("Target Name")) {
+                drawLine(graphics, client, x, y, 190, "Target  " + targetEntity.getName().getString());
+                y += 24;
+            }
+            if (AstraModules.isEnabled("Target Type")) {
+                drawLine(graphics, client, x, y, 190, "Type  " + targetEntity.getType().getDescription().getString());
+                y += 24;
+            }
+            if (AstraModules.isEnabled("Target Entity ID")) {
+                drawLine(graphics, client, x, y, 150, "Entity ID  " + targetEntity.getId());
+                y += 24;
+            }
+            if (targetEntity instanceof net.minecraft.world.entity.LivingEntity livingTarget) {
+                if (AstraModules.isEnabled("Target Health")) {
+                    drawMeter(graphics, client, x, y, 160, "TARGET HEALTH",
+                            livingTarget.getHealth(), livingTarget.getMaxHealth(), 0xFFE45B68);
+                    y += 34;
+                }
+                if (AstraModules.isEnabled("Target Max Health")) {
+                    drawLine(graphics, client, x, y, 160, "Max health  " + String.format("%.1f", livingTarget.getMaxHealth()));
+                    y += 24;
+                }
+                if (AstraModules.isEnabled("Target Armor")) {
+                    drawLine(graphics, client, x, y, 150, "Target armor  " + livingTarget.getArmorValue());
+                    y += 24;
+                }
+                if (AstraModules.isEnabled("Target Absorption")) {
+                    drawLine(graphics, client, x, y, 170, "Absorption  " + String.format("%.1f", livingTarget.getAbsorptionAmount()));
+                    y += 24;
+                }
+                if (AstraModules.isEnabled("Target Held Item")) {
+                    ItemStack targetItem = livingTarget.getMainHandItem();
+                    String itemName = targetItem.isEmpty() ? "Empty" : targetItem.getHoverName().getString();
+                    drawLine(graphics, client, x, y, 200, "Target item  " + itemName);
+                    y += 24;
+                }
+            }
+        }
+
         if (AstraModules.isEnabled("Player Height")) {
             drawMetric(graphics, client, x, y, 150, "ALTITUDE",
                     Integer.toString(client.player.getBlockY()), client.player.getBlockY(), 320.0, ACCENT);
