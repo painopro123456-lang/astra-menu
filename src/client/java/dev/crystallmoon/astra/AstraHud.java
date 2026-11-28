@@ -149,7 +149,7 @@ public final class AstraHud {
             y += 34;
         }
         if (AstraModules.isEnabled("World Time")) {
-            long ticks = Math.floorMod(client.level.getDayTime(), 24000L);
+            long ticks = Math.floorMod(client.level.getLevelData().getDayTime(), 24000L);
             long hours = (ticks / 1000 + 6) % 24;
             long minutes = (ticks % 1000) * 60 / 1000;
             drawLine(graphics, client, x, y, 145, String.format("World  %02d:%02d", hours, minutes));
@@ -265,7 +265,7 @@ public final class AstraHud {
             y += 24;
         }
         if (AstraModules.isEnabled("Day Counter") || AstraModules.isEnabled("World Age")) {
-            long dayTime = client.level.getDayTime();
+            long dayTime = client.level.getLevelData().getDayTime();
             if (AstraModules.isEnabled("Day Counter")) {
                 drawLine(graphics, client, x, y, 120, "Day  " + (dayTime / 24000L + 1));
                 y += 24;
