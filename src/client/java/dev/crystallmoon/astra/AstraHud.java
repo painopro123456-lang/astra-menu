@@ -11,6 +11,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.LightLayer;
 
 public final class AstraHud {
     private static final int BACKGROUND = 0x990D1016;
@@ -193,7 +194,7 @@ public final class AstraHud {
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Light Level")) {
-            int light = client.level.getMaxLocalRawBrightness(client.player.blockPosition());
+            int light = client.level.getBrightness(LightLayer.BLOCK, client.player.blockPosition());
             drawLine(graphics, client, x, y, 130, "Block light  " + light);
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
@@ -990,10 +991,16 @@ public final class AstraHud {
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
             } else if (client.hitResult instanceof net.minecraft.world.phys.BlockHitResult targetBlock) {
+                if (AstraModules.isEnabled("Target Distance")) {
+                    double distance = client.player.distanceTo(targetBlock.getBlockPos().getCenter());
+                    drawLine(graphics, client, x, y, 150, String.format("Target distance  %.1f m", distance));
+                    y += 24;
+                    if (y + 46 > layoutBottom) { y = 8; x += 250; }
+                }
                 if (AstraModules.isEnabled("Target Coordinates")) {
                     drawLine(graphics, client, x, y, 190, "Target XYZ  " + targetBlock.getBlockPos().toShortString());
                     y += 24;
-            if (y + 46 > layoutBottom) { y = 8; x += 250; }
+                    if (y + 46 > layoutBottom) { y = 8; x += 250; }
                 }
             }
         }
@@ -1126,13 +1133,14 @@ public final class AstraHud {
         }
 
         if (AstraModules.isEnabled("Chunk Updates")) {
-            drawLine(graphics, client, x, y, 175, "Chunk updates  " + chunkUpdates);
+            drawLine(graphics, client, x, y, 190, "Chunk loads/unloads  " + chunkUpdates);
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
         if (AstraModules.isEnabled("Spawnable Light")) {
-            int light = client.level.getMaxLocalRawBrightness(client.player.blockPosition());
-            drawLine(graphics, client, x, y, 165, "Spawn light  " + light + (light < 8 ? "  (hostile spawn risk)" : ""));
+            int light = client.level.getBrightness(LightLayer.BLOCK, client.player.blockPosition());
+            drawLine(graphics, client, x, y, 190, "Block light  " + light
+                    + (light == 0 ? "  (hostile mobs can spawn)" : ""));
             y += 24;
             if (y + 46 > layoutBottom) { y = 8; x += 250; }
         }
